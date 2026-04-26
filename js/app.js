@@ -55,7 +55,7 @@ const App = {
         await Income.init();
         await Expenses.init();
         await Obligations.init();
-        await Supermarket.init();
+        await SupermarketV2.init();
         await Calculators.init();
     },
 
@@ -74,7 +74,7 @@ const App = {
                 await Obligations.loadData();
                 break;
             case 'supermarket':
-                await Supermarket.loadData();
+                await SupermarketV2.showView('dashboard');
                 break;
             case 'reports':
                 await this.loadReports();
