@@ -78,13 +78,12 @@ const DB = {
     },
 
     async add(storeName, data) {
-        const userId = await this.getCurrentUserId();
-        const dataWithUser = { ...data, userId, createdAt: new Date().toISOString() };
+        const dataWithTimestamp = { ...data, createdAt: new Date().toISOString() };
         
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readwrite');
             const store = transaction.objectStore(storeName);
-            const request = store.add(dataWithUser);
+            const request = store.add(dataWithTimestamp);
             
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
@@ -92,8 +91,6 @@ const DB = {
     },
 
     async getAll(storeName, indexName = null, value = null) {
-        const userId = await this.getCurrentUserId();
-        
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readonly');
             const store = transaction.objectStore(storeName);
@@ -102,8 +99,7 @@ const DB = {
                 : store.getAll();
             
             request.onsuccess = () => {
-                const results = request.result.filter(item => item.userId === userId);
-                resolve(results);
+                resolve(request.result);
             };
             request.onerror = () => reject(request.error);
         });
@@ -142,35 +138,6 @@ const DB = {
         });
     },
 
-    async getCurrentUserId() {
-        const settings = await this.getSetting('currentUser');
-        if (!settings) {
-            const userId = await this.createDefaultUser();
-            return userId;
-        }
-        return settings.value;
-    },
-
-    async createDefaultUser() {
-        const user = {
-            name: 'Usuario Principal',
-            email: '',
-            createdAt: new Date().toISOString()
-        };
-        
-        const userId = await new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['users'], 'readwrite');
-            const store = transaction.objectStore('users');
-            const request = store.add(user);
-            
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-
-        await this.setSetting('currentUser', userId);
-        return userId;
-    },
-
     async getSetting(key) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['settings'], 'readonly');
@@ -194,14 +161,12 @@ const DB = {
     },
 
     async getByDateRange(storeName, startDate, endDate) {
-        const userId = await this.getCurrentUserId();
         const all = await this.getAll(storeName);
         
         return all.filter(item => {
             const itemDate = new Date(item.date);
             return itemDate >= new Date(startDate) && 
-                   itemDate <= new Date(endDate) &&
-                   item.userId === userId;
+                   itemDate <= new Date(endDate);
         });
     },
 
