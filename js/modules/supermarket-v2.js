@@ -525,9 +525,15 @@ const SupermarketV2 = {
             </div>
         `).join('');
 
-        // Mostrar modal con estilo inline para asegurar visibilidad
-        modal.style.display = 'flex';
-        modal.style.zIndex = '99999';
+        // Forzar visibilidad máxima con múltiples métodos
+        modal.style.cssText = 'display: flex !important; z-index: 2147483647 !important;';
+        modal.setAttribute('style', 'display: flex !important; z-index: 2147483647 !important;');
+        modal.classList.add('modal-visible');
+        
+        // Scroll al inicio
+        setTimeout(() => {
+            modal.scrollTop = 0;
+        }, 10);
         
         this.updatePreloadCounter();
     },
@@ -536,6 +542,7 @@ const SupermarketV2 = {
         const modal = document.getElementById('preloadProductsModal');
         if (modal) {
             modal.style.display = 'none';
+            modal.classList.remove('modal-visible');
         }
     },
 

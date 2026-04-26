@@ -10,6 +10,48 @@
     <link rel="icon" type="image/png" href="assets/logo.png">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/supermarket-v2.css">
+    
+    <!-- Estilos críticos del modal - Máxima prioridad -->
+    <style>
+        /* Modal overlay con z-index máximo */
+        #preloadProductsModal {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(0, 0, 0, 0.85) !important;
+            z-index: 2147483647 !important; /* Z-index máximo posible */
+            padding: 1rem !important;
+            overflow-y: auto !important;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Cuando se muestra el modal */
+        #preloadProductsModal[style*="display: flex"],
+        #preloadProductsModal[style*="display:flex"] {
+            display: flex !important;
+        }
+        
+        /* Contenido del modal */
+        #preloadProductsModal .modal-content {
+            position: relative !important;
+            z-index: 2147483647 !important;
+            background: white !important;
+            border-radius: 12px !important;
+            max-width: 900px !important;
+            width: 100% !important;
+            max-height: 90vh !important;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6) !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
