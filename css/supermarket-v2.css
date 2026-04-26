@@ -1,0 +1,285 @@
+/* ========================================
+   SUPERMERCADO V2 - ESTILOS ADICIONALES
+   ======================================== */
+
+/* Sub-navegación del supermercado */
+.super-nav {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.super-nav .btn {
+    flex: 1;
+    min-width: 100px;
+}
+
+/* Secciones del supermercado */
+.super-section {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Cards de productos maestros */
+.category-group {
+    margin-bottom: 2rem;
+}
+
+.category-group h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.master-product-card {
+    background: var(--background);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.master-product-card:hover {
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
+}
+
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.product-price {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.product-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+/* Cards de listas activas */
+.shopping-list-card {
+    background: var(--background);
+    padding: 1.25rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+    margin-bottom: 1rem;
+}
+
+.shopping-list-card h4 {
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.shopping-list-card p {
+    margin: 0.25rem 0;
+    color: var(--text-light);
+}
+
+.list-total {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 0.5rem 0;
+}
+
+.list-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+/* Productos frecuentes */
+.frequent-product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--background);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.frequent-product-item small {
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+/* Resultados de búsqueda */
+#productSearchResults {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+}
+
+.search-result-item {
+    padding: 0.75rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+}
+
+.search-result-item:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Productos en lista actual */
+.list-product-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    background: var(--background);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+
+.list-product-item.checked {
+    opacity: 0.6;
+}
+
+.list-product-item.checked .product-info strong {
+    text-decoration: line-through;
+}
+
+.product-info {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.list-total-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--background);
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 1.2rem;
+}
+
+.list-total-container span {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* Cards de tiendas */
+.store-card {
+    background: var(--background);
+    padding: 1.25rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+}
+
+.store-card h4 {
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.store-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+/* Historial */
+.history-item {
+    background: var(--background);
+    padding: 1.25rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--success);
+    margin-bottom: 1rem;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.history-date {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.history-total {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--success);
+    margin: 0.75rem 0;
+}
+
+/* Form row helper */
+.form-row {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+/* Responsive ajustes para supermercado */
+@media (max-width: 768px) {
+    .super-nav {
+        flex-direction: column;
+    }
+
+    .super-nav .btn {
+        width: 100%;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .list-product-item {
+        grid-template-columns: auto 1fr;
+        gap: 0.5rem;
+    }
+
+    .list-product-item input[type="number"] {
+        grid-column: 2;
+    }
+
+    .list-product-item button {
+        grid-column: 2;
+        justify-self: end;
+    }
+}
+
+@media (max-width: 480px) {
+    .shopping-list-card,
+    .history-item,
+    .store-card {
+        padding: 1rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

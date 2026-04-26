@@ -1,12 +1,29 @@
-# Mi Economía by NelSystems v1.0.2
+# Mi Economía by NelSystems v2.0 🚀
 
 ![Mi Economía](assets/logo.png)
 
 ## 📱 Aplicación Web Progresiva (PWA) de Control Financiero
 
-**Mi Economía** es una solución completa y moderna para gestionar tus finanzas personales de forma integral, clara y automatizada. Funciona 100% offline y es compatible con Android, iOS y Windows.
+**Mi Economía** es una solución completa y moderna para gestionar tus finanzas personales de forma integral, clara y automatizada. 
 
-**Versión 1.0.2 - Actualización:** Compatibilidad con Safari mejorada
+### 🔒 **100% LOCAL - TU PRIVACIDAD ES PRIMERO**
+- ✅ **Todos tus datos permanecen en TU dispositivo**
+- ✅ **Sin backend, sin servidor, sin registro**
+- ✅ **Sin envío de información a internet**
+- ✅ **Funciona 100% offline**
+- ✅ **Tu información NUNCA sale de tu navegador**
+
+Compatible con Android, iOS y Windows.
+
+**Versión 2.0 - Supermercado V2:**
+- 🛒 Catálogo maestro con 60+ productos pre-cargados
+- 🏪 Sistema de tiendas y comparación de precios
+- 📊 Dashboard dedicado con KPIs de supermercado
+- 🔄 Productos frecuentes y sugerencias inteligentes
+- 📈 Historial de precios por tienda
+- ✅ Integración automática con gastos
+
+**Versión 1.0.2 - Compatibilidad Safari:**
 - ✅ Safari con Tracking Prevention soportado
 - ✅ Chart.js opcional - app funciona sin gráficos
 - ✅ Fallback para navegadores antiguos
@@ -40,11 +57,15 @@
 - Detección automática de pagos vencidos
 - Historial de pagos realizados
 
-### 🛒 Módulo de Supermercado
-- Creación de listas de compras
-- Categorización de productos
-- Estimación de costos
-- **Integración automática**: al finalizar una compra, se registra como gasto en la categoría "Supermercado"
+### 🛒 Módulo de Supermercado V2 (NUEVO)
+- **📦 Catálogo Maestro**: 60+ productos pre-cargados organizados en 14 categorías
+- **🏪 Gestión de Tiendas**: 4 supermercados pre-configurados (AutoMercado, Walmart, Mas x Menos, Fresh Market)
+- **📝 Listas Inteligentes**: Búsqueda rápida, productos sugeridos, cantidades y precios
+- **💰 Dashboard Dedicado**: Presupuesto mensual, gastado, disponible, % ahorro
+- **📈 Historial de Precios**: Tracking por producto y tienda
+- **🔄 Productos Frecuentes**: Sugerencias basadas en tus compras
+- **✅ Integración Automática**: Al finalizar compra → se registra como gasto
+- **📊 Análisis Visual**: Gráficos de gastos por tienda y productos más comprados
 
 ### 🧮 Calculadoras Financieras
 1. **Préstamos**: Calcula cuotas mensuales y total de intereses
@@ -249,6 +270,51 @@ El sistema está diseñado para soportar múltiples usuarios:
 - [ ] Sincronización multi-dispositivo
 - [ ] Compartir finanzas (familias)
 - [ ] Planes premium
+
+---
+
+## 🔒 Privacidad y Seguridad
+
+### Tu Información es 100% TUYA
+
+**Mi Economía NO tiene backend, NO tiene servidor, NO envía datos a internet.**
+
+#### ✅ Lo que significa:
+- Todos tus datos financieros se almacenan ÚNICAMENTE en tu dispositivo
+- Usamos IndexedDB (base de datos local del navegador)
+- No hay cuentas, no hay login, no hay registro
+- No hay tracking, analytics o cookies de terceros
+- Funciona completamente offline después de la primera carga
+- Tu información financiera NUNCA sale de tu navegador
+
+#### 📦 Dónde están mis datos:
+```
+Tu Navegador
+  └── IndexedDB (Local)
+      ├── Ingresos
+      ├── Gastos
+      ├── Obligaciones
+      ├── Productos del supermercado
+      └── Configuraciones
+```
+
+#### ⚠️ Importante saber:
+- **Multi-dispositivo:** Cada dispositivo tiene SU PROPIA copia de datos (no se sincronizan automáticamente)
+- **Backup:** Exporta tus datos regularmente para no perderlos
+- **Cambiar de navegador:** Deberás exportar/importar tus datos manualmente
+
+#### 🛡️ Comparación con otras apps:
+
+| Característica | Mi Economía | Apps Tradicionales |
+|----------------|-------------|-------------------|
+| Datos en servidor | ❌ NO | ✅ Sí |
+| Requiere internet | Solo primera vez | Siempre |
+| Login requerido | ❌ NO | ✅ Sí |
+| Tracking | ❌ NO | ✅ Sí |
+| Privacidad | 🔒 Máxima | ⚠️ Variable |
+| Costo | 💰 Gratis siempre | 💰 Suscripción |
+
+**Lee más en:** [ARQUITECTURA-LOCAL.md](./ARQUITECTURA-LOCAL.md)
 
 ---
 

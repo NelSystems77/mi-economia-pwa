@@ -1,6 +1,6 @@
 const DB = {
     name: 'MiEconomiaDB',
-    version: 1,
+    version: 2,
     db: null,
 
     async init() {
@@ -20,43 +20,54 @@ const DB = {
                     const incomeStore = db.createObjectStore('income', { keyPath: 'id', autoIncrement: true });
                     incomeStore.createIndex('date', 'date', { unique: false });
                     incomeStore.createIndex('category', 'category', { unique: false });
-                    incomeStore.createIndex('userId', 'userId', { unique: false });
                 }
 
                 if (!db.objectStoreNames.contains('expenses')) {
                     const expensesStore = db.createObjectStore('expenses', { keyPath: 'id', autoIncrement: true });
                     expensesStore.createIndex('date', 'date', { unique: false });
                     expensesStore.createIndex('category', 'category', { unique: false });
-                    expensesStore.createIndex('userId', 'userId', { unique: false });
                 }
 
                 if (!db.objectStoreNames.contains('obligations')) {
                     const obligationsStore = db.createObjectStore('obligations', { keyPath: 'id', autoIncrement: true });
                     obligationsStore.createIndex('dueDay', 'dueDay', { unique: false });
-                    obligationsStore.createIndex('userId', 'userId', { unique: false });
                 }
 
                 if (!db.objectStoreNames.contains('obligationPayments')) {
                     const paymentsStore = db.createObjectStore('obligationPayments', { keyPath: 'id', autoIncrement: true });
                     paymentsStore.createIndex('obligationId', 'obligationId', { unique: false });
                     paymentsStore.createIndex('date', 'date', { unique: false });
-                    paymentsStore.createIndex('userId', 'userId', { unique: false });
+                }
+
+                // Supermercado V2 - Tablas nuevas
+                if (!db.objectStoreNames.contains('masterProducts')) {
+                    const masterStore = db.createObjectStore('masterProducts', { keyPath: 'id', autoIncrement: true });
+                    masterStore.createIndex('name', 'name', { unique: false });
+                    masterStore.createIndex('category', 'category', { unique: false });
+                    masterStore.createIndex('favorite', 'favorite', { unique: false });
+                }
+
+                if (!db.objectStoreNames.contains('stores')) {
+                    const storesStore = db.createObjectStore('stores', { keyPath: 'id', autoIncrement: true });
+                    storesStore.createIndex('name', 'name', { unique: false });
                 }
 
                 if (!db.objectStoreNames.contains('shoppingLists')) {
                     const listsStore = db.createObjectStore('shoppingLists', { keyPath: 'id', autoIncrement: true });
                     listsStore.createIndex('date', 'date', { unique: false });
-                    listsStore.createIndex('userId', 'userId', { unique: false });
+                    listsStore.createIndex('completed', 'completed', { unique: false });
                 }
 
                 if (!db.objectStoreNames.contains('shoppingProducts')) {
                     const productsStore = db.createObjectStore('shoppingProducts', { keyPath: 'id', autoIncrement: true });
                     productsStore.createIndex('listId', 'listId', { unique: false });
-                    productsStore.createIndex('userId', 'userId', { unique: false });
                 }
 
-                if (!db.objectStoreNames.contains('users')) {
-                    db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
+                if (!db.objectStoreNames.contains('priceHistory')) {
+                    const priceStore = db.createObjectStore('priceHistory', { keyPath: 'id', autoIncrement: true });
+                    priceStore.createIndex('productId', 'productId', { unique: false });
+                    priceStore.createIndex('storeId', 'storeId', { unique: false });
+                    priceStore.createIndex('date', 'date', { unique: false });
                 }
 
                 if (!db.objectStoreNames.contains('settings')) {
