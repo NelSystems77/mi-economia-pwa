@@ -8,6 +8,7 @@ const App = {
         this.showModule('dashboard');
         await this.loadModules();
         this.checkNotifications();
+        this.loadUserInfo();
         
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
@@ -15,6 +16,18 @@ const App = {
     },
 
     setupEventListeners() {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const module = e.currentTarget.dataset.module;
+                this.showModule(module);
+            });
+        });
+
+        // Botón de usuario
+        document.getElementById('btnUserMenu')?.addEventListener('click', () => {
+            this.showUserSettings();
+        });
+
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const module = e.currentTarget.dataset.module;
@@ -381,6 +394,113 @@ const App = {
         });
         
         return months;
+    },
+
+    async resetApp() {
+        if (!confirm('⚠️ ADVERTENCIA CRÍTICA ⚠️\n\n¿Estás absolutamente seguro de que deseas ELIMINAR TODOS LOS DATOS?\n\nSe borrará:\n✗ Todos los ingresos\n✗ Todos los gastos\n✗ Todas las obligaciones\n✗ Todas las listas de compras\n✗ Todo el historial\n✗ Configuración de usuario\n\nEsta acción es PERMANENTE y NO SE PUEDE DESHACER.')) {
+            return;
+        }
+
+        const confirmText = prompt('Para confirmar, escribe exactamente:\nBORRAR TODO\n\n(distingue mayúsculas)');
+        if (confirmText !== 'BORRAR TODO') {
+            alert('❌ Cancelado. El texto no coincide.');
+            return;
+        }
+
+        const randomNum = Math.floor(Math.random() * 9000) + 1000;
+        const numConfirm = prompt(`Última verificación.\nEscribe este número: ${randomNum}`);
+        if (numConfirm !== randomNum.toString()) {
+            alert('❌ Cancelado.');
+            return;
+        }
+
+        try {
+            const progress = document.createElement('div');
+            progress.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                            background: rgba(0,0,0,0.9); z-index: 999999; 
+                            display: flex; align-items: center; justify-content: center; 
+                            color: white; font-size: 1.5rem; flex-direction: column;">
+                    <div>🗑️ Eliminando datos...</div>
+                    <div style="margin-top: 1rem; font-size: 1rem; opacity: 0.7;">No cierres esta ventana</div>
+                </div>
+            `;
+            document.body.appendChild(progress);
+
+            await new Promise((resolve, reject) => {
+                const req = indexedDB.deleteDatabase('MiEconomiaDB');
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+
+            localStorage.clear();
+            sessionStorage.clear();
+
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                for (const reg of regs) await reg.unregister();
+            }
+
+            if ('caches' in window) {
+                const names = await caches.keys();
+                await Promise.all(names.map(n => caches.delete(n)));
+            }
+
+            progress.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                            background: linear-gradient(135deg, #00D976, #00B863); 
+                            z-index: 999999; display: flex; align-items: center; 
+                            justify-content: center; color: white; font-size: 2rem; 
+                            flex-direction: column;">
+                    <div>✅ App reseteada completamente</div>
+                    <div style="margin-top: 1rem; font-size: 1rem;">Recargando...</div>
+                </div>
+            `;
+
+            setTimeout(() => location.reload(true), 2000);
+        } catch (error) {
+            alert('❌ Error: ' + error.message);
+        }
+    },
+
+    showUserSettings() {
+        const modal = document.getElementById('userSettingsModal');
+        if (modal) {
+            document.getElementById('settingsUserName').value = localStorage.getItem('userName') || '';
+            document.getElementById('settingsUserEmail').value = localStorage.getItem('userEmail') || '';
+            modal.style.display = 'flex';
+        }
+    },
+
+    closeUserSettings() {
+        document.getElementById('userSettingsModal').style.display = 'none';
+    },
+
+    saveUserSettings() {
+        const name = document.getElementById('settingsUserName').value.trim();
+        const email = document.getElementById('settingsUserEmail').value.trim();
+
+        if (!name) {
+            alert('❌ El nombre es obligatorio');
+            return;
+        }
+
+        localStorage.setItem('userName', name);
+        localStorage.setItem('userEmail', email);
+
+        const display = document.getElementById('userNameDisplay');
+        if (display) display.textContent = name;
+
+        this.closeUserSettings();
+        alert('✅ Configuración guardada');
+    },
+
+    loadUserInfo() {
+        const name = localStorage.getItem('userName');
+        if (name) {
+            const display = document.getElementById('userNameDisplay');
+            if (display) display.textContent = name;
+        }
     }
 };
 

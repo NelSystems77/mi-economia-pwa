@@ -399,12 +399,15 @@ body {
 }
 
 .btn-danger {
-    background: var(--danger);
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     color: white;
+    border: none;
 }
 
 .btn-danger:hover {
-    background: #E53E3E;
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
 .btn-sm {
