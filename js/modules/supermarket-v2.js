@@ -525,8 +525,18 @@ const SupermarketV2 = {
             </div>
         `).join('');
 
+        // Mostrar modal con estilo inline para asegurar visibilidad
         modal.style.display = 'flex';
+        modal.style.zIndex = '99999';
+        
         this.updatePreloadCounter();
+    },
+
+    closePreloadModal() {
+        const modal = document.getElementById('preloadProductsModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
     },
 
     toggleCategory(category, checked) {
