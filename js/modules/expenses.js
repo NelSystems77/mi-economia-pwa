@@ -90,14 +90,15 @@ const Expenses = {
 
     getCategoryLabel(category) {
         const labels = {
-            fuel: 'Gasolina',
-            vehicle: 'Mantenimiento Vehículo',
-            home: 'Mantenimiento Hogar',
-            groceries: 'Supermercado',
-            health: 'Salud',
-            entertainment: 'Entretenimiento',
-            education: 'Educación',
-            other: 'Otro'
+            fuel: '⛽ Gasolina',
+            vehicle: '🚗 Mantenimiento Vehículo',
+            home: '🏠 Mantenimiento Hogar',
+            groceries: '🛒 Supermercado',
+            health: '🏥 Salud',
+            medicines: '💊 Medicamentos',
+            entertainment: '🎮 Entretenimiento',
+            education: '📚 Educación',
+            other: '📦 Otro'
         };
         return labels[category] || category;
     },

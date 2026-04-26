@@ -109,7 +109,11 @@ const SupermarketV2 = {
                 { name: "AutoMercado", location: "Escazú", favorite: true },
                 { name: "Walmart", location: "Centro", favorite: false },
                 { name: "Mas x Menos", location: "Local", favorite: false },
-                { name: "Fresh Market", location: "Plaza", favorite: false }
+                { name: "Fresh Market", location: "Plaza", favorite: false },
+                { name: "Palí", location: "Local", favorite: false },
+                { name: "Maxi Palí", location: "Centro", favorite: false },
+                { name: "Mini Super", location: "Barrio", favorite: false },
+                { name: "Chino", location: "Esquina", favorite: false }
             ];
             
             for (const store of defaultStores) {
