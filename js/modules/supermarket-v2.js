@@ -5,8 +5,9 @@
 
 const SupermarketV2 = {
     currentListId: null,
-    currentView: 'dashboard', // dashboard, catalog, newlist, stores, history
+    currentView: 'dashboard',
     monthlyBudget: 0,
+    storeChart: null, // Almacenar instancia del gráfico
     
     // Lista Maestra de 80+ Productos Predefinidos
     DEFAULT_PRODUCTS: [
@@ -502,23 +503,23 @@ const SupermarketV2 = {
                            id="cat-${category}" 
                            onchange="SupermarketV2.toggleCategory('${category}', this.checked)">
                     <label for="cat-${category}">
-                        <strong>${this.getCategoryLabel(category)}</strong>
-                        <span>(${prods.length})</span>
+                        ${this.getCategoryLabel(category)}
+                        <span>(${prods.length} productos)</span>
                     </label>
                 </div>
                 <div class="category-products" id="products-${category}">
                     ${prods.map(p => `
-                        <div class="preload-product-item">
+                        <label class="preload-product-item" for="prod-${p.id}">
                             <input type="checkbox" 
                                    class="product-check cat-${category}" 
                                    data-product-id="${p.id}"
                                    id="prod-${p.id}"
                                    onchange="SupermarketV2.updatePreloadCounter()">
-                            <label for="prod-${p.id}">
-                                ${p.name}
+                            <div style="flex: 1; min-width: 0;">
+                                <strong>${p.name}</strong>
                                 <small>${p.defaultQuantity} ${p.unit}</small>
-                            </label>
-                        </div>
+                            </div>
+                        </label>
                     `).join('')}
                 </div>
             </div>
@@ -989,6 +990,12 @@ const SupermarketV2 = {
         const canvas = document.getElementById('storeExpensesChart');
         if (!canvas || typeof Chart === 'undefined' || !Chart) return;
 
+        // Destruir gráfico anterior si existe
+        if (this.storeChart) {
+            this.storeChart.destroy();
+            this.storeChart = null;
+        }
+
         // Agrupar por tienda
         const storeData = {};
         lists.forEach(list => {
@@ -996,8 +1003,16 @@ const SupermarketV2 = {
             storeData[store] = (storeData[store] || 0) + (list.totalActual || 0);
         });
 
+        // Si no hay datos, no crear gráfico
+        if (Object.keys(storeData).length === 0) {
+            canvas.style.display = 'none';
+            return;
+        }
+
+        canvas.style.display = 'block';
         const ctx = canvas.getContext('2d');
-        new Chart(ctx, {
+        
+        this.storeChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: Object.keys(storeData),
