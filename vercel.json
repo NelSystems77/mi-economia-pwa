@@ -1,17 +1,3 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/sw.js",
-      "headers": {
-        "Service-Worker-Allowed": "/"
-      }
-    }
-  ]
-}
+     "version": 2
+   }
