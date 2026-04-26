@@ -53,7 +53,13 @@ const Dashboard = {
 
     renderExpensesChart(expenses) {
         const canvas = document.getElementById('expensesChart');
-        if (!canvas) return;
+        if (!canvas || typeof Chart === 'undefined' || !Chart) {
+            console.warn('Chart.js no disponible');
+            if (canvas) {
+                canvas.parentElement.innerHTML = '<p style="text-align:center; color: #718096;">Gráfico no disponible</p>';
+            }
+            return;
+        }
 
         if (this.charts.expenses) {
             this.charts.expenses.destroy();
@@ -102,7 +108,13 @@ const Dashboard = {
 
     renderCashFlowChart(income, expenses) {
         const canvas = document.getElementById('cashFlowChart');
-        if (!canvas) return;
+        if (!canvas || typeof Chart === 'undefined' || !Chart) {
+            console.warn('Chart.js no disponible');
+            if (canvas) {
+                canvas.parentElement.innerHTML = '<p style="text-align:center; color: #718096;">Gráfico no disponible</p>';
+            }
+            return;
+        }
 
         if (this.charts.cashFlow) {
             this.charts.cashFlow.destroy();

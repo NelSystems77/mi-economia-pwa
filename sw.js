@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mi-economia-v1';
+const CACHE_NAME = 'mi-economia-v1.0.2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -12,8 +12,7 @@ const urlsToCache = [
   '/js/modules/supermarket.js',
   '/js/modules/calculators.js',
   '/assets/logo.png',
-  '/manifest.json',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
+  '/manifest.json'
 ];
 
 self.addEventListener('install', event => {

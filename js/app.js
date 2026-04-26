@@ -180,11 +180,18 @@ const App = {
     },
 
     formatDate(date) {
-        return new Intl.DateFormat('es-CR', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        }).format(new Date(date));
+        try {
+            return new Intl.DateFormat('es-CR', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            }).format(new Date(date));
+        } catch (e) {
+            // Fallback simple para navegadores sin Intl
+            const d = new Date(date);
+            const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        }
     },
 
     async loadReports() {
@@ -252,7 +259,13 @@ const App = {
 
     renderTrendsChart(income, expenses) {
         const canvas = document.getElementById('trendsChart');
-        if (!canvas) return;
+        if (!canvas || typeof Chart === 'undefined' || !Chart) {
+            console.warn('Chart.js no disponible');
+            if (canvas) {
+                canvas.parentElement.innerHTML = '<p style="text-align:center; color: #718096;">Gráfico no disponible</p>';
+            }
+            return;
+        }
 
         if (this.charts.trends) {
             this.charts.trends.destroy();
@@ -294,7 +307,13 @@ const App = {
 
     renderCategoriesChart(expenses) {
         const canvas = document.getElementById('categoriesChart');
-        if (!canvas) return;
+        if (!canvas || typeof Chart === 'undefined' || !Chart) {
+            console.warn('Chart.js no disponible');
+            if (canvas) {
+                canvas.parentElement.innerHTML = '<p style="text-align:center; color: #718096;">Gráfico no disponible</p>';
+            }
+            return;
+        }
 
         if (this.charts.categories) {
             this.charts.categories.destroy();

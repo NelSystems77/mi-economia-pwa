@@ -1,5 +1,30 @@
 # 📝 Changelog - Mi Economía PWA
 
+## [1.0.2] - 2026-04-26
+
+### 🐛 Correcciones de Compatibilidad
+- **CRÍTICO:** Chart.js ahora es opcional - app funciona sin gráficos si CDN está bloqueado
+- **Safari:** Tracking Prevention ya no rompe la aplicación
+- **Fechas:** Fallback para navegadores sin soporte completo de Intl.DateFormat
+- **Gráficos:** Degradación elegante cuando Chart.js no está disponible
+
+### 🔧 Cambios Técnicos
+- Chart.js se carga dinámicamente con manejo de errores
+- Service Worker actualizado (no cachea Chart.js de CDN)
+- Funciones de renderizado de gráficos con validación de Chart.js
+- formatDate() con try-catch y fallback manual
+
+### ✅ Compatibilidad Mejorada
+- Safari con Tracking Prevention activado
+- iOS Safari (todas las versiones)
+- Navegadores con privacidad estricta
+- Navegadores antiguos sin Intl completo
+
+### 📚 Documentación
+- Nuevo archivo: SAFARI-FIX.md con detalles técnicos
+
+---
+
 ## [1.0.1] - 2026-04-23
 
 ### 🐛 Correcciones Críticas

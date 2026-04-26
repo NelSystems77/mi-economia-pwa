@@ -502,7 +502,17 @@
         <div id="modalContainer"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Cargar Chart.js de forma segura
+        const chartScript = document.createElement('script');
+        chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+        chartScript.crossOrigin = 'anonymous';
+        chartScript.onerror = function() {
+            console.warn('Chart.js no disponible - gráficos deshabilitados');
+            window.Chart = null; // Flag para detectar que no hay Chart.js
+        };
+        document.head.appendChild(chartScript);
+    </script>
     <script src="js/db.js"></script>
     <script src="js/modules/dashboard.js"></script>
     <script src="js/modules/income.js"></script>

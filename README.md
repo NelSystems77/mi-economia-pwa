@@ -1,4 +1,4 @@
-# Mi Economía by NelSystems v1.0.1
+# Mi Economía by NelSystems v1.0.2
 
 ![Mi Economía](assets/logo.png)
 
@@ -6,11 +6,11 @@
 
 **Mi Economía** es una solución completa y moderna para gestionar tus finanzas personales de forma integral, clara y automatizada. Funciona 100% offline y es compatible con Android, iOS y Windows.
 
-**Versión 1.0.1 - Actualización:** Correcciones funcionales críticas
-- ✅ Modal de productos en supermercado corregido
-- ✅ Inicialización de fechas mejorada
-- ✅ Calculadoras validadas
-- ✅ Dashboard auto-refresh implementado
+**Versión 1.0.2 - Actualización:** Compatibilidad con Safari mejorada
+- ✅ Safari con Tracking Prevention soportado
+- ✅ Chart.js opcional - app funciona sin gráficos
+- ✅ Fallback para navegadores antiguos
+- ✅ Degradación elegante en todos los navegadores
 
 ---
 
