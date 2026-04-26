@@ -292,12 +292,18 @@
     right: 0 !important;
     bottom: 0 !important;
     background: rgba(0, 0, 0, 0.75) !important;
-    display: flex !important;
+    display: none !important; /* OCULTO POR DEFECTO */
     align-items: center !important;
     justify-content: center !important;
-    z-index: 999999 !important; /* Máxima prioridad */
+    z-index: 999999 !important;
     padding: 1rem !important;
     overflow-y: auto !important;
+}
+
+/* Se muestra solo cuando JS agrega display: flex */
+#preloadProductsModal[style*="display: flex"],
+#preloadProductsModal[style*="display:flex"] {
+    display: flex !important;
 }
 
 .modal-overlay {
