@@ -229,26 +229,40 @@ const SupermarketV2 = {
         if (!container) return;
 
         if (lists.length === 0) {
-            container.innerHTML = '<p class="empty-state-text">No hay listas activas</p>';
+            container.innerHTML = '<p class="empty-state-text">No hay listas activas. <a href="#" onclick="SupermarketV2.showView(\'newlist\'); return false;">Crear una</a></p>';
             return;
         }
 
         container.innerHTML = lists.map(list => `
             <div class="shopping-list-card">
-                <h4>${list.name}</h4>
-                <p>🏪 ${list.storeName || 'Sin tienda'}</p>
-                <p>📦 ${list.itemCount || 0} productos</p>
+                <div class="list-header">
+                    <h4>${list.name}</h4>
+                    <span class="list-date">${App.formatDate(list.date)}</span>
+                </div>
+                <p class="list-store">🏪 ${list.storeName || 'Sin tienda'}</p>
+                <p class="list-items">📦 ${list.itemCount || 0} productos</p>
                 <p class="list-total">💰 ${App.formatCurrency(list.totalEstimated || 0)}</p>
                 <div class="list-actions">
-                    <button class="btn btn-sm btn-primary" onclick="SupermarketV2.continueList(${list.id})">
-                        Continuar
+                    <button class="btn btn-sm btn-primary" onclick="SupermarketV2.continueList(${list.id})" title="Editar">
+                        ✏️ Editar
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="SupermarketV2.deleteList(${list.id})">
+                    <button class="btn btn-sm btn-secondary" onclick="SupermarketV2.duplicateList(${list.id})" title="Duplicar">
+                        📋 Duplicar
+                    </button>
+                    <button class="btn btn-sm btn-accent" onclick="SupermarketV2.finishShoppingFromDashboard(${list.id})" title="Finalizar">
+                        ✅ Finalizar
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="SupermarketV2.deleteList(${list.id})" title="Eliminar">
                         🗑️
                     </button>
                 </div>
             </div>
         `).join('');
+    },
+
+    async finishShoppingFromDashboard(listId) {
+        this.currentListId = listId;
+        await this.finishShopping();
     },
 
     async loadFrequentProducts() {
@@ -398,16 +412,25 @@ const SupermarketV2 = {
 
         // Limpiar lista actual
         this.currentListId = null;
-        document.getElementById('currentListProducts').innerHTML = '';
-        document.getElementById('listTotalEstimated').textContent = '₡0.00';
+        const productsContainer = document.getElementById('currentListProducts');
+        const totalContainer = document.getElementById('listTotalEstimated');
+        const addSection = document.getElementById('addProductsSection');
+        
+        if (productsContainer) productsContainer.innerHTML = '';
+        if (totalContainer) totalContainer.textContent = '₡0.00';
+        if (addSection) addSection.style.display = 'none';
+        
+        // Limpiar formulario
+        document.getElementById('newListName').value = '';
+        document.getElementById('newListStore').value = '';
     },
 
     async createShoppingList() {
-        const name = document.getElementById('newListName').value;
+        const name = document.getElementById('newListName').value.trim();
         const storeId = parseInt(document.getElementById('newListStore').value);
 
         if (!name || !storeId) {
-            alert('Completa todos los campos');
+            this.showError('Completa el nombre y la tienda');
             return;
         }
 
@@ -425,10 +448,267 @@ const SupermarketV2 = {
         });
 
         this.currentListId = listId;
-        this.showSuccess('Lista creada');
+        this.showSuccess('Lista creada - Agrega productos');
         
         // Mostrar sección de agregar productos
         document.getElementById('addProductsSection').style.display = 'block';
+        document.getElementById('listNameDisplay').textContent = name;
+        document.getElementById('listStoreDisplay').textContent = store.name;
+        
+        await this.renderListProducts();
+    },
+
+    async createEmptyList() {
+        await this.createShoppingList();
+    },
+
+    async createListWithProducts() {
+        const name = document.getElementById('newListName').value.trim();
+        const storeId = parseInt(document.getElementById('newListStore').value);
+
+        if (!name || !storeId) {
+            this.showError('Completa el nombre y la tienda primero');
+            return;
+        }
+
+        // Crear la lista primero
+        await this.createShoppingList();
+        
+        // Mostrar modal de pre-carga
+        await this.showPreloadModal();
+    },
+
+    async showPreloadModal() {
+        const modal = document.getElementById('preloadProductsModal');
+        if (!modal) {
+            this.showError('Modal no disponible');
+            return;
+        }
+
+        // Cargar productos agrupados por categoría
+        const products = await DB.getAll('masterProducts');
+        const grouped = {};
+        
+        products.forEach(p => {
+            if (!grouped[p.category]) grouped[p.category] = [];
+            grouped[p.category].push(p);
+        });
+
+        const container = document.getElementById('preloadProductsList');
+        container.innerHTML = Object.entries(grouped).map(([category, prods]) => `
+            <div class="preload-category">
+                <div class="category-header">
+                    <input type="checkbox" 
+                           id="cat-${category}" 
+                           onchange="SupermarketV2.toggleCategory('${category}', this.checked)">
+                    <label for="cat-${category}">
+                        <strong>${this.getCategoryLabel(category)}</strong>
+                        <span>(${prods.length})</span>
+                    </label>
+                </div>
+                <div class="category-products" id="products-${category}">
+                    ${prods.map(p => `
+                        <div class="preload-product-item">
+                            <input type="checkbox" 
+                                   class="product-check cat-${category}" 
+                                   data-product-id="${p.id}"
+                                   id="prod-${p.id}"
+                                   onchange="SupermarketV2.updatePreloadCounter()">
+                            <label for="prod-${p.id}">
+                                ${p.name}
+                                <small>${p.defaultQuantity} ${p.unit}</small>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        modal.style.display = 'flex';
+        this.updatePreloadCounter();
+    },
+
+    toggleCategory(category, checked) {
+        const checkboxes = document.querySelectorAll(`.cat-${category}`);
+        checkboxes.forEach(cb => cb.checked = checked);
+        this.updatePreloadCounter();
+    },
+
+    selectAllProducts() {
+        document.querySelectorAll('.product-check').forEach(cb => cb.checked = true);
+        document.querySelectorAll('.category-header input').forEach(cb => cb.checked = true);
+        this.updatePreloadCounter();
+    },
+
+    selectFrequentProducts() {
+        // Deseleccionar todos primero
+        document.querySelectorAll('.product-check').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.category-header input').forEach(cb => cb.checked = false);
+        
+        // Seleccionar solo frecuentes
+        DB.getAll('masterProducts').then(products => {
+            const frequent = products
+                .filter(p => p.frequency > 0)
+                .sort((a, b) => b.frequency - a.frequency)
+                .slice(0, 20);
+            
+            frequent.forEach(p => {
+                const checkbox = document.getElementById(`prod-${p.id}`);
+                if (checkbox) checkbox.checked = true;
+            });
+            
+            this.updatePreloadCounter();
+        });
+    },
+
+    updatePreloadCounter() {
+        const checked = document.querySelectorAll('.product-check:checked').length;
+        const counter = document.getElementById('preloadCounter');
+        if (counter) counter.textContent = `${checked} seleccionados`;
+    },
+
+    async confirmPreload() {
+        if (!this.currentListId) {
+            this.showError('Primero crea una lista');
+            return;
+        }
+
+        const selectedCheckboxes = document.querySelectorAll('.product-check:checked');
+        const selectedIds = Array.from(selectedCheckboxes).map(cb => 
+            parseInt(cb.dataset.productId)
+        );
+
+        if (selectedIds.length === 0) {
+            this.showError('Selecciona al menos un producto');
+            return;
+        }
+
+        // Agregar productos seleccionados a la lista
+        for (const productId of selectedIds) {
+            const product = await DB.get('masterProducts', productId);
+            
+            await DB.add('shoppingProducts', {
+                listId: this.currentListId,
+                productId: product.id,
+                name: product.name,
+                quantity: product.defaultQuantity,
+                unit: product.unit,
+                estimatedPrice: product.lastPrice || 0,
+                actualPrice: 0,
+                checked: false
+            });
+        }
+
+        // Cerrar modal y actualizar lista
+        this.closePreloadModal();
+        await this.updateListTotal();
+        await this.renderListProducts();
+        
+        this.showSuccess(`${selectedIds.length} productos agregados`);
+    },
+
+    closePreloadModal() {
+        const modal = document.getElementById('preloadProductsModal');
+        if (modal) modal.style.display = 'none';
+    },
+
+    async editList(listId) {
+        this.currentListId = listId;
+        const list = await DB.get('shoppingLists', listId);
+        
+        // Cambiar a vista de edición
+        this.showView('newlist');
+        
+        // Llenar datos de la lista
+        document.getElementById('newListName').value = list.name;
+        document.getElementById('newListStore').value = list.storeId;
+        document.getElementById('listNameDisplay').textContent = list.name;
+        document.getElementById('listStoreDisplay').textContent = list.storeName;
+        
+        // Mostrar productos
+        document.getElementById('addProductsSection').style.display = 'block';
+        await this.renderListProducts();
+    },
+
+    async saveList() {
+        if (!this.currentListId) {
+            this.showError('No hay lista para guardar');
+            return;
+        }
+
+        const list = await DB.get('shoppingLists', this.currentListId);
+        const products = await DB.getAll('shoppingProducts');
+        const listProducts = products.filter(p => p.listId === this.currentListId);
+        
+        // Actualizar totales
+        const total = listProducts.reduce((sum, p) => {
+            const price = p.actualPrice || p.estimatedPrice || 0;
+            return sum + (price * p.quantity);
+        }, 0);
+
+        list.totalEstimated = total;
+        list.itemCount = listProducts.length;
+        await DB.update('shoppingLists', list);
+
+        this.showSuccess('Lista guardada');
+        this.showView('dashboard');
+    },
+
+    async deleteList(listId) {
+        if (!confirm('¿Eliminar esta lista y todos sus productos?')) return;
+
+        // Eliminar productos de la lista
+        const products = await DB.getAll('shoppingProducts');
+        const listProducts = products.filter(p => p.listId === listId);
+        
+        for (const product of listProducts) {
+            await DB.delete('shoppingProducts', product.id);
+        }
+
+        // Eliminar la lista
+        await DB.delete('shoppingLists', listId);
+
+        this.showSuccess('Lista eliminada');
+        await this.loadDashboard();
+    },
+
+    async continueList(listId) {
+        await this.editList(listId);
+    },
+
+    async duplicateList(listId) {
+        const originalList = await DB.get('shoppingLists', listId);
+        const products = await DB.getAll('shoppingProducts');
+        const originalProducts = products.filter(p => p.listId === listId);
+
+        // Crear nueva lista
+        const newListId = await DB.add('shoppingLists', {
+            name: `${originalList.name} (Copia)`,
+            storeId: originalList.storeId,
+            storeName: originalList.storeName,
+            date: new Date().toISOString().split('T')[0],
+            completed: false,
+            totalEstimated: 0,
+            totalActual: 0,
+            itemCount: 0
+        });
+
+        // Copiar productos
+        for (const product of originalProducts) {
+            await DB.add('shoppingProducts', {
+                listId: newListId,
+                productId: product.productId,
+                name: product.name,
+                quantity: product.quantity,
+                unit: product.unit,
+                estimatedPrice: product.estimatedPrice,
+                actualPrice: 0,
+                checked: false
+            });
+        }
+
+        this.showSuccess('Lista duplicada');
+        await this.editList(newListId);
     },
 
     async searchProductsToAdd(query) {
@@ -670,11 +950,39 @@ const SupermarketV2 = {
                 <p>🏪 ${list.storeName}</p>
                 <p>📦 ${list.itemCount} productos</p>
                 <p class="history-total">💰 ${App.formatCurrency(list.totalActual)}</p>
-                <button class="btn btn-sm btn-primary" onclick="SupermarketV2.viewListDetail(${list.id})">
-                    Ver Detalle
-                </button>
+                <div class="list-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="SupermarketV2.viewListDetail(${list.id})">
+                        👁️ Ver Detalle
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="SupermarketV2.duplicateList(${list.id})">
+                        📋 Usar como Plantilla
+                    </button>
+                </div>
             </div>
         `).join('');
+    },
+
+    async viewListDetail(listId) {
+        const list = await DB.get('shoppingLists', listId);
+        const products = await DB.getAll('shoppingProducts');
+        const listProducts = products.filter(p => p.listId === listId);
+
+        let detail = `📝 ${list.name}\n`;
+        detail += `🏪 ${list.storeName}\n`;
+        detail += `📅 ${App.formatDate(list.completedDate)}\n\n`;
+        detail += `Productos (${listProducts.length}):\n`;
+        detail += `${'─'.repeat(40)}\n`;
+        
+        listProducts.forEach(p => {
+            const price = p.actualPrice || p.estimatedPrice || 0;
+            detail += `• ${p.name} - ${p.quantity} ${p.unit}\n`;
+            detail += `  ${App.formatCurrency(price)}\n`;
+        });
+        
+        detail += `${'─'.repeat(40)}\n`;
+        detail += `💰 Total: ${App.formatCurrency(list.totalActual)}`;
+
+        alert(detail);
     },
 
     async renderStoreChart(lists) {

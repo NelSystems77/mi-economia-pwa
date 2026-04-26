@@ -44,7 +44,7 @@
                 </div>
 
                 <div class="dashboard-grid">
-                    <!-- Balance Cards -->
+                    <!-- Balance Cards Principales -->
                     <div class="card balance-card income">
                         <div class="card-icon">💰</div>
                         <div class="card-content">
@@ -74,6 +74,34 @@
                         <div class="card-content">
                             <span class="card-label">Ahorro</span>
                             <span class="card-value" id="savingsPercent">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- KPIs Adicionales: Supermercado y Deuda -->
+                    <div class="card balance-card groceries">
+                        <div class="card-icon">🛒</div>
+                        <div class="card-content">
+                            <span class="card-label">Supermercado</span>
+                            <span class="card-value" id="totalGroceries">$0.00</span>
+                            <small class="card-subtitle" id="groceryCount">0 compras</small>
+                        </div>
+                    </div>
+
+                    <div class="card balance-card debt">
+                        <div class="card-icon">💳</div>
+                        <div class="card-content">
+                            <span class="card-label">Deuda Total</span>
+                            <span class="card-value" id="totalDebt">$0.00</span>
+                            <small class="card-subtitle" id="activeObligations">0 activas</small>
+                        </div>
+                    </div>
+
+                    <div class="card balance-card monthly-payment">
+                        <div class="card-icon">📅</div>
+                        <div class="card-content">
+                            <span class="card-label">Pago Mensual</span>
+                            <span class="card-value" id="monthlyPayment">$0.00</span>
+                            <small class="card-subtitle">Obligaciones</small>
                         </div>
                     </div>
 

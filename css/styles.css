@@ -232,6 +232,21 @@ body {
     color: var(--dark);
 }
 
+.balance-card.groceries {
+    background: linear-gradient(135deg, #48BB78 0%, #38A169 100%);
+    color: white;
+}
+
+.balance-card.debt {
+    background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%);
+    color: white;
+}
+
+.balance-card.monthly-payment {
+    background: linear-gradient(135deg, #9F7AEA 0%, #805AD5 100%);
+    color: white;
+}
+
 .card-icon {
     font-size: 2.5rem;
 }
@@ -249,6 +264,12 @@ body {
 .card-value {
     font-size: 1.8rem;
     font-weight: 700;
+}
+
+.card-subtitle {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-top: 0.25rem;
 }
 
 .chart-card {

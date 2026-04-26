@@ -34,10 +34,73 @@ const Dashboard = {
         const balance = totalIncome - totalAllExpenses;
         const savingsPercent = totalIncome > 0 ? ((balance / totalIncome) * 100) : 0;
 
+        // KPI principal
         document.getElementById('totalIncome').textContent = App.formatCurrency(totalIncome);
         document.getElementById('totalExpenses').textContent = App.formatCurrency(totalAllExpenses);
         document.getElementById('totalBalance').textContent = App.formatCurrency(balance);
         document.getElementById('savingsPercent').textContent = `${savingsPercent.toFixed(1)}%`;
+
+        // KPIs adicionales
+        await this.loadGroceryStats(expenses);
+        await this.loadDebtBalance();
+    },
+
+    async loadGroceryStats(expenses) {
+        // Gastos de supermercado en el período
+        const groceryExpenses = expenses.filter(e => 
+            e.category === 'groceries' || 
+            e.category === 'supermarket' || 
+            (e.metadata && e.metadata.listId)
+        );
+        
+        const totalGroceries = groceryExpenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+        const groceryCount = groceryExpenses.length;
+
+        const groceryEl = document.getElementById('totalGroceries');
+        const groceryCountEl = document.getElementById('groceryCount');
+        
+        if (groceryEl) groceryEl.textContent = App.formatCurrency(totalGroceries);
+        if (groceryCountEl) groceryCountEl.textContent = `${groceryCount} compras`;
+    },
+
+    async loadDebtBalance() {
+        // Obtener todas las obligaciones activas
+        const allObligations = await DB.getAll('obligations');
+        const activeObligations = allObligations.filter(o => o.active !== false);
+
+        // Calcular deuda total pendiente
+        let totalDebt = 0;
+        let monthlyPayment = 0;
+
+        for (const obligation of activeObligations) {
+            if (obligation.type === 'monthly') {
+                // Para obligaciones mensuales, solo el monto mensual
+                monthlyPayment += parseFloat(obligation.amount);
+            } else if (obligation.type === 'installment') {
+                // Para cuotas, calcular saldo pendiente
+                const totalAmount = parseFloat(obligation.totalAmount || 0);
+                const installmentAmount = parseFloat(obligation.amount);
+                const totalInstallments = parseFloat(obligation.installments || 1);
+                
+                // Obtener pagos realizados
+                const payments = await DB.getAll('obligationPayments');
+                const obligationPayments = payments.filter(p => p.obligationId === obligation.id);
+                const paidInstallments = obligationPayments.length;
+                const remainingInstallments = totalInstallments - paidInstallments;
+                
+                const remainingDebt = remainingInstallments * installmentAmount;
+                totalDebt += remainingDebt;
+                monthlyPayment += installmentAmount;
+            }
+        }
+
+        const totalDebtEl = document.getElementById('totalDebt');
+        const monthlyPaymentEl = document.getElementById('monthlyPayment');
+        const activeObligationsEl = document.getElementById('activeObligations');
+
+        if (totalDebtEl) totalDebtEl.textContent = App.formatCurrency(totalDebt);
+        if (monthlyPaymentEl) monthlyPaymentEl.textContent = App.formatCurrency(monthlyPayment);
+        if (activeObligationsEl) activeObligationsEl.textContent = `${activeObligations.length} activas`;
     },
 
     async loadCharts() {
