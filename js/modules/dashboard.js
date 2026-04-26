@@ -2,7 +2,8 @@ const Dashboard = {
     charts: {},
 
     async init() {
-        await this.setupEventListeners();
+        this.setupEventListeners();
+        await this.refresh();
     },
 
     setupEventListeners() {

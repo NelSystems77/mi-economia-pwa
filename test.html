@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mi Economía</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        .pass { background: #d4edda; }
+        .fail { background: #f8d7da; }
+        button { margin: 5px; padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Tests Funcionales - Mi Economía</h1>
+    
+    <div id="results"></div>
+    
+    <h2>Ejecutar Pruebas</h2>
+    <button onclick="runAllTests()">▶️ Ejecutar Todas las Pruebas</button>
+    <button onclick="clearDatabase()">🗑️ Limpiar Base de Datos</button>
+    
+    <script src="js/db.js"></script>
+    <script>
+        let results = [];
+        
+        async function runTest(name, testFn) {
+            try {
+                await testFn();
+                results.push({ name, status: 'pass', message: 'OK' });
+                return true;
+            } catch (error) {
+                results.push({ name, status: 'fail', message: error.message });
+                return false;
+            }
+        }
+        
+        async function runAllTests() {
+            results = [];
+            document.getElementById('results').innerHTML = '<p>Ejecutando pruebas...</p>';
+            
+            // Initialize DB
+            await DB.init();
+            
+            // Test 1: DB Connection
+            await runTest('Conexión a IndexedDB', async () => {
+                if (!DB.db) throw new Error('DB no inicializada');
+            });
+            
+            // Test 2: Add Income
+            await runTest('Agregar Ingreso', async () => {
+                const id = await DB.add('income', {
+                    description: 'Test Salario',
+                    amount: 1000,
+                    category: 'salary',
+                    date: '2026-04-01',
+                    recurring: false
+                });
+                if (!id) throw new Error('No se creó el ingreso');
+            });
+            
+            // Test 3: Get Income
+            await runTest('Obtener Ingresos', async () => {
+                const incomes = await DB.getAll('income');
+                if (incomes.length === 0) throw new Error('No hay ingresos');
+            });
+            
+            // Test 4: Add Expense
+            await runTest('Agregar Gasto', async () => {
+                const id = await DB.add('expenses', {
+                    description: 'Test Gasolina',
+                    amount: 50,
+                    category: 'fuel',
+                    date: '2026-04-02'
+                });
+                if (!id) throw new Error('No se creó el gasto');
+            });
+            
+            // Test 5: Add Obligation
+            await runTest('Agregar Obligación', async () => {
+                const id = await DB.add('obligations', {
+                    name: 'Test Electricidad',
+                    amount: 100,
+                    category: 'electricity',
+                    dueDay: 15,
+                    alertDays: 3,
+                    active: true
+                });
+                if (!id) throw new Error('No se creó la obligación');
+            });
+            
+            // Test 6: Add Shopping List
+            await runTest('Crear Lista de Compras', async () => {
+                const id = await DB.add('shoppingLists', {
+                    name: 'Test Lista',
+                    date: '2026-04-23',
+                    completed: false
+                });
+                if (!id) throw new Error('No se creó la lista');
+                
+                // Add product to list
+                await DB.add('shoppingProducts', {
+                    listId: id,
+                    name: 'Test Leche',
+                    quantity: 2,
+                    price: 5,
+                    category: 'dairy',
+                    checked: false
+                });
+            });
+            
+            // Test 7: Get Shopping Products
+            await runTest('Obtener Productos de Lista', async () => {
+                const products = await DB.getAll('shoppingProducts');
+                if (products.length === 0) throw new Error('No hay productos');
+            });
+            
+            // Test 8: Date Range Query
+            await runTest('Consulta por Rango de Fechas', async () => {
+                const start = '2026-04-01';
+                const end = '2026-04-30';
+                const items = await DB.getByDateRange('income', start, end);
+                if (items.length === 0) throw new Error('No hay datos en el rango');
+            });
+            
+            // Test 9: Current User
+            await runTest('Usuario Actual', async () => {
+                const userId = await DB.getCurrentUserId();
+                if (!userId) throw new Error('No hay usuario activo');
+            });
+            
+            // Test 10: Update Record
+            await runTest('Actualizar Registro', async () => {
+                const incomes = await DB.getAll('income');
+                if (incomes.length > 0) {
+                    const income = incomes[0];
+                    income.amount = 1500;
+                    await DB.update('income', income);
+                }
+            });
+            
+            displayResults();
+        }
+        
+        function displayResults() {
+            const container = document.getElementById('results');
+            const passed = results.filter(r => r.status === 'pass').length;
+            const total = results.length;
+            
+            let html = `<h3>Resultados: ${passed}/${total} Pasaron</h3>`;
+            
+            results.forEach(result => {
+                html += `
+                    <div class="test ${result.status}">
+                        <strong>${result.status === 'pass' ? '✅' : '❌'} ${result.name}</strong>
+                        <br>${result.message}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        async function clearDatabase() {
+            if (!confirm('¿Estás seguro de limpiar toda la base de datos?')) return;
+            
+            const stores = ['income', 'expenses', 'obligations', 'obligationPayments', 'shoppingLists', 'shoppingProducts'];
+            
+            for (const store of stores) {
+                const items = await DB.getAll(store);
+                for (const item of items) {
+                    await DB.delete(store, item.id);
+                }
+            }
+            
+            alert('Base de datos limpiada');
+            location.reload();
+        }
+        
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 500);
+        });
+    </script>
+</body>
+</html>

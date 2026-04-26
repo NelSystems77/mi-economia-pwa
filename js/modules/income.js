@@ -13,10 +13,13 @@ const Income = {
             });
         }
 
-        const dateInput = document.getElementById('incomeDate');
-        if (dateInput && !dateInput.value) {
-            dateInput.value = new Date().toISOString().split('T')[0];
-        }
+        // Set today's date as default
+        setTimeout(() => {
+            const dateInput = document.getElementById('incomeDate');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+        }, 100);
     },
 
     async handleSubmit(e) {

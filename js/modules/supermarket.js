@@ -2,19 +2,31 @@ const Supermarket = {
     currentListId: null,
 
     async init() {
-        this.setupEventListeners();
         await this.loadData();
+        this.setupEventListeners();
     },
 
     setupEventListeners() {
-        document.getElementById('btnNewList')?.addEventListener('click', () => this.createNewList());
-        document.getElementById('btnAddProduct')?.addEventListener('click', () => this.showAddProductModal());
-        document.getElementById('btnFinishShopping')?.addEventListener('click', () => this.finishShopping());
-        
+        const btnNewList = document.getElementById('btnNewList');
+        const btnAddProduct = document.getElementById('btnAddProduct');
+        const btnFinishShopping = document.getElementById('btnFinishShopping');
         const listSelector = document.getElementById('activeShoppingList');
+
+        if (btnNewList) {
+            btnNewList.addEventListener('click', () => this.createNewList());
+        }
+        
+        if (btnAddProduct) {
+            btnAddProduct.addEventListener('click', () => this.showAddProductModal());
+        }
+        
+        if (btnFinishShopping) {
+            btnFinishShopping.addEventListener('click', () => this.finishShopping());
+        }
+        
         if (listSelector) {
             listSelector.addEventListener('change', (e) => {
-                this.currentListId = parseInt(e.target.value);
+                this.currentListId = parseInt(e.target.value) || null;
                 this.loadProducts();
             });
         }
@@ -77,19 +89,19 @@ const Supermarket = {
             <form id="addProductForm">
                 <div class="form-group">
                     <label>Nombre del producto</label>
-                    <input type="text" id="productName" required>
+                    <input type="text" id="productName" class="form-control" required>
                 </div>
                 <div class="form-group">
                     <label>Cantidad</label>
-                    <input type="number" id="productQuantity" value="1" min="1" required>
+                    <input type="number" id="productQuantity" class="form-control" value="1" min="1" required>
                 </div>
                 <div class="form-group">
                     <label>Precio estimado</label>
-                    <input type="number" id="productPrice" step="0.01" min="0">
+                    <input type="number" id="productPrice" class="form-control" step="0.01" min="0" value="0">
                 </div>
                 <div class="form-group">
                     <label>Categoría</label>
-                    <select id="productCategory">
+                    <select id="productCategory" class="form-control">
                         <option value="fruits">Frutas y Verduras</option>
                         <option value="meat">Carnes</option>
                         <option value="dairy">Lácteos</option>
@@ -101,23 +113,38 @@ const Supermarket = {
                         <option value="other">Otro</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary">Agregar</button>
+                <button type="submit" class="btn btn-primary">Agregar Producto</button>
             </form>
         `);
 
-        document.getElementById('addProductForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.addProduct();
-        });
+        setTimeout(() => {
+            const form = document.getElementById('addProductForm');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await this.addProduct();
+                });
+            }
+        }, 100);
     },
 
     async addProduct() {
+        const nameEl = document.getElementById('productName');
+        const quantityEl = document.getElementById('productQuantity');
+        const priceEl = document.getElementById('productPrice');
+        const categoryEl = document.getElementById('productCategory');
+
+        if (!nameEl || !quantityEl || !categoryEl) {
+            this.showError('Error en el formulario');
+            return;
+        }
+
         const product = {
             listId: this.currentListId,
-            name: document.getElementById('productName').value,
-            quantity: parseInt(document.getElementById('productQuantity').value),
-            price: parseFloat(document.getElementById('productPrice').value) || 0,
-            category: document.getElementById('productCategory').value,
+            name: nameEl.value,
+            quantity: parseInt(quantityEl.value) || 1,
+            price: parseFloat(priceEl?.value) || 0,
+            category: categoryEl.value,
             checked: false
         };
 
@@ -127,6 +154,7 @@ const Supermarket = {
             document.querySelector('.modal-overlay')?.remove();
             this.showSuccess('Producto agregado');
         } catch (error) {
+            console.error('Error adding product:', error);
             this.showError('Error al agregar el producto');
         }
     },

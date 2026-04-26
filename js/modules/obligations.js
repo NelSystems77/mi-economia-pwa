@@ -17,11 +17,18 @@ const Obligations = {
     async handleSubmit(e) {
         const form = e.target;
 
+        const dueDay = parseInt(document.getElementById('obligationDueDay').value);
+        
+        if (dueDay < 1 || dueDay > 31) {
+            this.showError('El día de vencimiento debe estar entre 1 y 31');
+            return;
+        }
+
         const obligation = {
             name: document.getElementById('obligationName').value,
             amount: parseFloat(document.getElementById('obligationAmount').value),
             category: document.getElementById('obligationCategory').value,
-            dueDay: parseInt(document.getElementById('obligationDueDay').value),
+            dueDay: dueDay,
             alertDays: parseInt(document.getElementById('obligationAlertDays').value),
             active: true
         };
@@ -33,6 +40,7 @@ const Obligations = {
             await Dashboard.refresh();
             this.showSuccess('Obligación registrada exitosamente');
         } catch (error) {
+            console.error('Error saving obligation:', error);
             this.showError('Error al guardar la obligación');
         }
     },

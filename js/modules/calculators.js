@@ -163,19 +163,22 @@ const Calculators = {
                 <span class="result-value" style="color: var(--danger)">${App.formatCurrency(totalInterest)}</span>
             </div>
             <div class="result-item">
-                <span class="result-label">Ahorro si aumentas el pago:</span>
+                <span class="result-label">Ahorro si aumentas el pago 20%:</span>
                 <span class="result-value">
-                    ${this.calculateSavings(debt, rate, payment * 1.2, totalPaid)}
+                    ${this.calculateSavingsFromExtraPayment(debt, rate, payment * 1.2, totalPaid)}
                 </span>
             </div>
         `;
     },
 
-    calculateSavingsFromExtraPayment(debt, rate, payment, currentTotal) {
-        const newMonths = Math.log(payment / (payment - debt * rate)) / Math.log(1 + rate);
-        const newTotal = payment * newMonths;
-        const savings = currentTotal - newTotal;
+    calculateSavingsFromExtraPayment(debt, rate, newPayment, currentTotal) {
+        if (newPayment <= (debt * rate)) return 'N/A';
         
-        return `${App.formatCurrency(savings)} en ${Math.ceil((newMonths - (currentTotal / payment))).toFixed(0)} meses menos`;
+        const newMonths = Math.log(newPayment / (newPayment - debt * rate)) / Math.log(1 + rate);
+        const newTotal = newPayment * newMonths;
+        const savings = currentTotal - newTotal;
+        const monthsSaved = (currentTotal / payment) - newMonths;
+        
+        return `${App.formatCurrency(savings)} en ${Math.ceil(monthsSaved)} meses menos`;
     }
 };
