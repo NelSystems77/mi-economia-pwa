@@ -752,25 +752,48 @@ const SupermarketV2 = {
         
         pendingContainer.innerHTML = pending.map(p => `
             <div class="shopping-product-item" data-product-id="${p.id}">
-                <input type="checkbox" id="check-${p.id}" onchange="SupermarketV2.toggleProductCheck(${p.id})">
+                <input type="checkbox" class="product-checkbox" data-product-id="${p.id}">
                 <label for="check-${p.id}">
                     <strong>${p.name}</strong>
                     <small>${p.quantity} ${p.unit}</small>
                 </label>
-                <input type="number" class="price-input" placeholder="Precio" value="${p.actualPrice || ''}" onchange="SupermarketV2.updateProductPrice(${p.id}, this.value)" style="width: 80px;">
+                <input type="number" class="price-input" data-product-id="${p.id}" placeholder="Precio" value="${p.actualPrice || ''}" style="width: 80px;">
             </div>
         `).join('') || '<p class="empty-state-text">✅ ¡Todos los productos comprados!</p>';
         
+        // Agregar event listeners después de renderizar
+        document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', async (e) => {
+                const productId = parseInt(e.target.dataset.productId);
+                await this.toggleProductCheck(productId);
+            });
+        });
+        
+        document.querySelectorAll('.price-input').forEach(input => {
+            input.addEventListener('change', async (e) => {
+                const productId = parseInt(e.target.dataset.productId);
+                await this.updateProductPrice(productId, e.target.value);
+            });
+        });
+        
         checkedContainer.innerHTML = checked.map(p => `
             <div class="shopping-product-item checked-item">
-                <input type="checkbox" id="check-${p.id}" checked disabled>
+                <input type="checkbox" checked disabled>
                 <label style="text-decoration: line-through; opacity: 0.6;">
                     <strong>${p.name}</strong>
                     <small>${p.quantity} ${p.unit}</small>
                 </label>
-                <button class="btn-icon" onclick="SupermarketV2.uncheckProduct(${p.id})" title="Desmarcar">↩️</button>
+                <button class="btn-icon undo-btn" data-product-id="${p.id}" title="Desmarcar">↩️</button>
             </div>
         `).join('') || '<p class="empty-state-text">Ningún producto comprado aún</p>';
+        
+        // Event listeners para botones de undo
+        document.querySelectorAll('.undo-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const productId = parseInt(e.target.dataset.productId);
+                await this.uncheckProduct(productId);
+            });
+        });
         
         const counterElement = document.getElementById('pendingCount');
         if (counterElement) {
@@ -822,12 +845,27 @@ const SupermarketV2 = {
                 <div class="search-result-item">
                     <span><strong>${p.name}</strong> <small>${p.defaultQuantity} ${p.unit}</small></span>
                     ${inList ? 
-                        `<button class="btn btn-sm btn-primary" onclick="SupermarketV2.markAsChecked(${inList.id})">✓ Marcar Comprado</button>` :
-                        `<button class="btn btn-sm btn-secondary" onclick="SupermarketV2.addFromSearch(${p.id})">+ Agregar</button>`
+                        `<button class="btn btn-sm btn-primary mark-checked-btn" data-product-id="${inList.id}">✓ Marcar Comprado</button>` :
+                        `<button class="btn btn-sm btn-secondary add-search-btn" data-product-id="${p.id}">+ Agregar</button>`
                     }
                 </div>
             `;
         }).join('') || '<p>No se encontraron resultados</p>';
+        
+        // Event listeners para botones de búsqueda
+        document.querySelectorAll('.mark-checked-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const productId = parseInt(e.target.dataset.productId);
+                await this.markAsChecked(productId);
+            });
+        });
+        
+        document.querySelectorAll('.add-search-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const productId = parseInt(e.target.dataset.productId);
+                await this.addFromSearch(productId);
+            });
+        });
     },
 
     async addFromSearch(productId) {
