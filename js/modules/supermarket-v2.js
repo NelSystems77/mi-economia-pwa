@@ -765,8 +765,10 @@ const SupermarketV2 = {
             </div>
         `).join('') || '<p class="empty-state-text">Ningún producto comprado aún</p>';
         
-        document.getElementById('pendingCount').textContent = `${checked.length} de ${total}`;
-        document.getElementById('checkedCount').textContent = checked.length;
+        const counterElement = document.getElementById('pendingCount');
+        if (counterElement) {
+            counterElement.textContent = `${checked.length} de ${total}`;
+        }
     },
 
     async toggleProductCheck(productId) {
