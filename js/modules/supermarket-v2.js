@@ -4,6 +4,7 @@
 // =============================================
 
 const SupermarketV2 = {
+    version: '2.5.1-DEBUG',
     currentListId: null,
     currentView: 'dashboard',
     monthlyBudget: 0,
@@ -762,12 +763,15 @@ const SupermarketV2 = {
         `).join('') || '<p class="empty-state-text">✅ ¡Todos los productos comprados!</p>';
         
         // Agregar event listeners después de renderizar
-        document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        console.log('📌 Agregando event listeners a', checkboxes.length, 'checkboxes');
+        checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', async (e) => {
                 const productId = parseInt(e.target.dataset.productId);
                 await this.toggleProductCheck(productId);
             });
         });
+        console.log('✅ Event listeners agregados a checkboxes');
         
         document.querySelectorAll('.price-input').forEach(input => {
             input.addEventListener('change', async (e) => {
@@ -1289,3 +1293,7 @@ const SupermarketV2 = {
 
 // Exponer globalmente para que funcione con onclick en HTML
 window.SupermarketV2 = SupermarketV2;
+
+// Log de versión para verificar que el archivo se cargó
+console.log('🚀 SupermarketV2 cargado - Versión:', SupermarketV2.version);
+console.log('✅ Event listeners disponibles');
