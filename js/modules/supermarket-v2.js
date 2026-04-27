@@ -4,7 +4,7 @@
 // =============================================
 
 const SupermarketV2 = {
-    version: '3.5.4',
+    version: '3.5.5',
     currentListId: null,
     currentView: 'dashboard',
     monthlyBudget: 0,
@@ -814,8 +814,8 @@ const SupermarketV2 = {
     },
 
     async toggleProductCheck(productId) {
+        console.log('🔄 Marcando producto:', productId);
         try {
-            console.log('🔄 Marcando producto:', productId);
             const product = await DB.get('shoppingProducts', productId);
             console.log('📦 Producto antes:', product.checked);
             product.checked = !product.checked;
@@ -828,7 +828,9 @@ const SupermarketV2 = {
             await this.renderShoppingMode();
             console.log('✅ Render completo');
         } catch (error) {
-            console.error('❌ Error al marcar producto:', error);
+            console.error('❌ ERROR CRÍTICO en toggleProductCheck:', error);
+            console.error('Stack:', error.stack);
+            throw error; // Re-lanzar para que se vea en consola
         }
     },
 
