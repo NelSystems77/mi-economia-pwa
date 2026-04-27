@@ -802,11 +802,22 @@ const SupermarketV2 = {
     },
 
     async toggleProductCheck(productId) {
-        const product = await DB.get('shoppingProducts', productId);
-        product.checked = !product.checked;
-        product.checkedAt = new Date().toISOString();
-        await DB.update('shoppingProducts', product);
-        await this.renderShoppingMode();
+        try {
+            console.log('🔄 Marcando producto:', productId);
+            const product = await DB.get('shoppingProducts', productId);
+            console.log('📦 Producto antes:', product.checked);
+            product.checked = !product.checked;
+            product.checkedAt = new Date().toISOString();
+            await DB.update('shoppingProducts', product);
+            console.log('✅ Producto después:', product.checked);
+            
+            // Re-renderizar inmediatamente
+            console.log('🎨 Re-renderizando...');
+            await this.renderShoppingMode();
+            console.log('✅ Render completo');
+        } catch (error) {
+            console.error('❌ Error al marcar producto:', error);
+        }
     },
 
     async uncheckProduct(productId) {
