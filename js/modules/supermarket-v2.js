@@ -726,8 +726,15 @@ const SupermarketV2 = {
         const list = await DB.get('shoppingLists', listId);
         
         this.showView('shopping');
-        document.getElementById('shoppingListName').textContent = list.name;
-        document.getElementById('shoppingStoreName').textContent = list.storeName;
+        
+        // Esperar a que el DOM se actualice
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const nameElement = document.getElementById('shoppingListName');
+        const storeElement = document.getElementById('shoppingStoreName');
+        
+        if (nameElement) nameElement.textContent = list.name;
+        if (storeElement) storeElement.textContent = list.storeName;
         
         await this.renderShoppingMode();
     },
