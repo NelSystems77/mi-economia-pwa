@@ -4,7 +4,7 @@
 // =============================================
 
 const SupermarketV2 = {
-    version: '3.5.3',
+    version: '3.5.4',
     currentListId: null,
     currentView: 'dashboard',
     monthlyBudget: 0,
@@ -770,7 +770,13 @@ const SupermarketV2 = {
             checkbox.addEventListener('change', async function(e) {
                 console.log('🔘 Checkbox clickeado!', e.target.dataset.productId);
                 const productId = parseInt(e.target.dataset.productId);
-                await self.toggleProductCheck(productId);
+                console.log('⏳ Llamando a toggleProductCheck con ID:', productId);
+                try {
+                    await self.toggleProductCheck(productId);
+                    console.log('✅ toggleProductCheck completado');
+                } catch (error) {
+                    console.error('❌ Error en toggleProductCheck:', error);
+                }
             });
         });
         console.log('✅ Event listeners agregados a checkboxes');
