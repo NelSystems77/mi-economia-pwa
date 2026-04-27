@@ -4,7 +4,7 @@
 // =============================================
 
 const SupermarketV2 = {
-    version: '2.5.1-DEBUG',
+    version: '3.5.3',
     currentListId: null,
     currentView: 'dashboard',
     monthlyBudget: 0,
@@ -765,18 +765,20 @@ const SupermarketV2 = {
         // Agregar event listeners después de renderizar
         const checkboxes = document.querySelectorAll('.product-checkbox');
         console.log('📌 Agregando event listeners a', checkboxes.length, 'checkboxes');
+        const self = this; // Guardar referencia a SupermarketV2
         checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', async (e) => {
+            checkbox.addEventListener('change', async function(e) {
+                console.log('🔘 Checkbox clickeado!', e.target.dataset.productId);
                 const productId = parseInt(e.target.dataset.productId);
-                await this.toggleProductCheck(productId);
+                await self.toggleProductCheck(productId);
             });
         });
         console.log('✅ Event listeners agregados a checkboxes');
         
         document.querySelectorAll('.price-input').forEach(input => {
-            input.addEventListener('change', async (e) => {
+            input.addEventListener('change', async function(e) {
                 const productId = parseInt(e.target.dataset.productId);
-                await this.updateProductPrice(productId, e.target.value);
+                await self.updateProductPrice(productId, e.target.value);
             });
         });
         
@@ -793,9 +795,9 @@ const SupermarketV2 = {
         
         // Event listeners para botones de undo
         document.querySelectorAll('.undo-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
+            btn.addEventListener('click', async function(e) {
                 const productId = parseInt(e.target.dataset.productId);
-                await this.uncheckProduct(productId);
+                await self.uncheckProduct(productId);
             });
         });
         
