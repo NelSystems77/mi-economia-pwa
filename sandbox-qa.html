@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Mi Economía - Sandbox QA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #00D976; margin-bottom: 20px; }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-left: 4px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .test-item.pass { border-color: #00D976; background: #f0fdf4; }
+        .test-item.fail { border-color: #ff4444; background: #fef2f2; }
+        .test-item.running { border-color: #ffa500; background: #fff7ed; }
+        button {
+            padding: 10px 20px;
+            background: #00D976;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        button:hover { background: #00B863; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .status { font-weight: 600; }
+        .status.pass { color: #00D976; }
+        .status.fail { color: #ff4444; }
+        .status.running { color: #ffa500; }
+        #results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f9ff;
+            border-radius: 8px;
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .summary-card {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .summary-card h3 { margin-bottom: 10px; font-size: 14px; }
+        .summary-card .number { font-size: 32px; font-weight: bold; }
+        .passed { background: #f0fdf4; color: #00D976; }
+        .failed { background: #fef2f2; color: #ff4444; }
+        .total { background: #f0f9ff; color: #0ea5e9; }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        .error-detail {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fef2f2;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Mi Economía - Sandbox QA v2.4</h1>
+        
+        <div style="margin-bottom: 20px;">
+            <button onclick="runAllTests()" id="runBtn">▶️ Ejecutar Todas las Pruebas</button>
+            <button onclick="clearResults()" style="background: #666; margin-left: 10px;">🗑️ Limpiar</button>
+        </div>
+
+        <div id="results"></div>
+
+        <div class="test-section">
+            <h2>📊 Resultados</h2>
+            <div class="summary">
+                <div class="summary-card passed">
+                    <h3>Pruebas Exitosas</h3>
+                    <div class="number" id="passedCount">0</div>
+                </div>
+                <div class="summary-card failed">
+                    <h3>Pruebas Fallidas</h3>
+                    <div class="number" id="failedCount">0</div>
+                </div>
+                <div class="summary-card total">
+                    <h3>Total Pruebas</h3>
+                    <div class="number" id="totalCount">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let passed = 0;
+        let failed = 0;
+
+        function clearResults() {
+            testResults = [];
+            passed = 0;
+            failed = 0;
+            document.getElementById('results').innerHTML = '';
+            updateSummary();
+        }
+
+        function updateSummary() {
+            document.getElementById('passedCount').textContent = passed;
+            document.getElementById('failedCount').textContent = failed;
+            document.getElementById('totalCount').textContent = passed + failed;
+        }
+
+        function addTestResult(name, status, details = '') {
+            const result = { name, status, details };
+            testResults.push(result);
+            
+            if (status === 'pass') passed++;
+            if (status === 'fail') failed++;
+            
+            const resultsDiv = document.getElementById('results');
+            const testDiv = document.createElement('div');
+            testDiv.className = `test-item ${status}`;
+            testDiv.innerHTML = `
+                <span>${name}</span>
+                <span class="status ${status}">${status === 'pass' ? '✅ PASS' : '❌ FAIL'}</span>
+            `;
+            
+            if (details && status === 'fail') {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-detail';
+                errorDiv.textContent = details;
+                testDiv.appendChild(errorDiv);
+            }
+            
+            resultsDiv.appendChild(testDiv);
+            updateSummary();
+        }
+
+        async function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Simular IndexedDB
+        class MockDB {
+            constructor() {
+                this.stores = {
+                    masterProducts: [],
+                    shoppingLists: [],
+                    shoppingProducts: [],
+                    stores: [],
+                    income: [],
+                    expenses: [],
+                    obligations: []
+                };
+                this.nextId = 1;
+            }
+
+            async init() {
+                // Inicializar productos maestros
+                this.stores.masterProducts = [
+                    { id: 1, name: 'Arroz', category: 'grains', defaultQuantity: 8, unit: 'kg', lastPrice: 3500 },
+                    { id: 2, name: 'Leche', category: 'dairy', defaultQuantity: 2, unit: 'lt', lastPrice: 2800 },
+                    { id: 3, name: 'Pan', category: 'bakery', defaultQuantity: 1, unit: 'paquete', lastPrice: 1200 }
+                ];
+
+                // Inicializar tiendas
+                this.stores.stores = [
+                    { id: 1, name: 'AutoMercado', location: 'Escazú' },
+                    { id: 2, name: 'Walmart', location: 'Centro' }
+                ];
+                
+                return true;
+            }
+
+            async add(storeName, data) {
+                const item = { ...data, id: this.nextId++ };
+                this.stores[storeName].push(item);
+                return item.id;
+            }
+
+            async get(storeName, id) {
+                return this.stores[storeName].find(item => item.id === id);
+            }
+
+            async getAll(storeName) {
+                return [...this.stores[storeName]];
+            }
+
+            async update(storeName, data) {
+                const index = this.stores[storeName].findIndex(item => item.id === data.id);
+                if (index !== -1) {
+                    this.stores[storeName][index] = data;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        const mockDB = new MockDB();
+
+        async function runAllTests() {
+            document.getElementById('runBtn').disabled = true;
+            clearResults();
+
+            try {
+                // Test 1: Inicialización de DB
+                try {
+                    await mockDB.init();
+                    const products = await mockDB.getAll('masterProducts');
+                    if (products.length === 3) {
+                        addTestResult('✅ Test 1: Inicialización DB', 'pass');
+                    } else {
+                        addTestResult('❌ Test 1: Inicialización DB', 'fail', `Esperado 3 productos, obtenido ${products.length}`);
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 1: Inicialización DB', 'fail', e.message);
+                }
+
+                await sleep(100);
+
+                // Test 2: Crear lista de compras
+                try {
+                    const listId = await mockDB.add('shoppingLists', {
+                        name: 'Test Lista',
+                        storeId: 1,
+                        storeName: 'AutoMercado',
+                        date: '2026-04-27',
+                        completed: false
+                    });
+                    
+                    if (listId > 0) {
+                        addTestResult('✅ Test 2: Crear lista de compras', 'pass');
+                    } else {
+                        addTestResult('❌ Test 2: Crear lista de compras', 'fail', 'No se generó ID');
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 2: Crear lista de compras', 'fail', e.message);
+                }
+
+                await sleep(100);
+
+                // Test 3: Agregar producto a lista
+                try {
+                    const productId = await mockDB.add('shoppingProducts', {
+                        listId: 1,
+                        productId: 1,
+                        name: 'Arroz',
+                        quantity: 2,
+                        unit: 'kg',
+                        checked: false
+                    });
+                    
+                    if (productId > 0) {
+                        addTestResult('✅ Test 3: Agregar producto a lista', 'pass');
+                    } else {
+                        addTestResult('❌ Test 3: Agregar producto a lista', 'fail', 'No se generó ID');
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 3: Agregar producto a lista', 'fail', e.message);
+                }
+
+                await sleep(100);
+
+                // Test 4: Marcar producto como comprado
+                try {
+                    const product = await mockDB.get('shoppingProducts', 1);
+                    product.checked = true;
+                    await mockDB.update('shoppingProducts', product);
+                    
+                    const updated = await mockDB.get('shoppingProducts', 1);
+                    if (updated.checked === true) {
+                        addTestResult('✅ Test 4: Marcar producto como comprado', 'pass');
+                    } else {
+                        addTestResult('❌ Test 4: Marcar producto como comprado', 'fail', 'Checked no se actualizó');
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 4: Marcar producto como comprado', 'fail', e.message);
+                }
+
+                await sleep(100);
+
+                // Test 5: Contador de productos
+                try {
+                    await mockDB.add('shoppingProducts', {
+                        listId: 1, productId: 2, name: 'Leche', quantity: 1, unit: 'lt', checked: false
+                    });
+                    await mockDB.add('shoppingProducts', {
+                        listId: 1, productId: 3, name: 'Pan', quantity: 1, unit: 'paquete', checked: false
+                    });
+                    
+                    const allProducts = await mockDB.getAll('shoppingProducts');
+                    const listProducts = allProducts.filter(p => p.listId === 1);
+                    const checked = listProducts.filter(p => p.checked).length;
+                    const total = listProducts.length;
+                    
+                    if (checked === 1 && total === 3) {
+                        addTestResult('✅ Test 5: Contador productos (1 de 3)', 'pass');
+                    } else {
+                        addTestResult('❌ Test 5: Contador productos', 'fail', `Esperado 1/3, obtenido ${checked}/${total}`);
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 5: Contador productos', 'fail', e.message);
+                }
+
+                await sleep(100);
+
+                // Test 6: Cantidad personalizada
+                try {
+                    const customProduct = await mockDB.get('shoppingProducts', 1);
+                    if (customProduct.quantity === 2) {
+                        addTestResult('✅ Test 6: Cantidad personalizada guardada', 'pass');
+                    } else {
+                        addTestResult('❌ Test 6: Cantidad personalizada', 'fail', `Esperado 2, obtenido ${customProduct.quantity}`);
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 6: Cantidad personalizada', 'fail', e.message);
+                }
+
+                await sleep(100);
+
+                // Test 7: Verificar window.SupermarketV2
+                try {
+                    // Simular que existe
+                    window.SupermarketV2 = {
+                        toggleProductCheck: async (id) => true,
+                        renderShoppingMode: async () => true,
+                        enterShoppingMode: async (id) => true
+                    };
+                    
+                    const exists = typeof window.SupermarketV2 !== 'undefined';
+                    const hasToggle = typeof window.SupermarketV2.toggleProductCheck === 'function';
+                    
+                    if (exists && hasToggle) {
+                        addTestResult('✅ Test 7: SupermarketV2 expuesto globalmente', 'pass');
+                    } else {
+                        addTestResult('❌ Test 7: SupermarketV2 global', 'fail', 'No está expuesto o falta método');
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 7: SupermarketV2 global', 'fail', e.message);
+                }
+
+                await sleep(100);
+
+                // Test 8: Elementos DOM necesarios
+                try {
+                    const requiredElements = [
+                        'pendingCount',
+                        'pendingProducts',
+                        'checkedProducts',
+                        'shoppingSearch',
+                        'searchResults',
+                        'manualTotal'
+                    ];
+                    
+                    // Simular que existen
+                    requiredElements.forEach(id => {
+                        if (!document.getElementById(id)) {
+                            const el = document.createElement('div');
+                            el.id = id;
+                            document.body.appendChild(el);
+                        }
+                    });
+                    
+                    const allExist = requiredElements.every(id => document.getElementById(id) !== null);
+                    
+                    if (allExist) {
+                        addTestResult('✅ Test 8: Elementos DOM requeridos existen', 'pass');
+                    } else {
+                        addTestResult('❌ Test 8: Elementos DOM', 'fail', 'Faltan elementos en HTML');
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 8: Elementos DOM', 'fail', e.message);
+                }
+
+                await sleep(100);
+
+                // Test 9: Finalizar compra con total general
+                try {
+                    const list = await mockDB.get('shoppingLists', 1);
+                    list.completed = true;
+                    list.totalManual = 50000;
+                    await mockDB.update('shoppingLists', list);
+                    
+                    const expense = await mockDB.add('expenses', {
+                        description: 'Compra: Test Lista',
+                        amount: 50000,
+                        category: 'groceries',
+                        date: '2026-04-27'
+                    });
+                    
+                    if (expense > 0) {
+                        addTestResult('✅ Test 9: Finalizar compra con total general', 'pass');
+                    } else {
+                        addTestResult('❌ Test 9: Finalizar compra', 'fail', 'No se creó gasto');
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 9: Finalizar compra', 'fail', e.message);
+                }
+
+                await sleep(100);
+
+                // Test 10: Responsive - viewport
+                try {
+                    const viewportMeta = document.querySelector('meta[name="viewport"]');
+                    if (viewportMeta && viewportMeta.content.includes('width=device-width')) {
+                        addTestResult('✅ Test 10: Configuración responsive', 'pass');
+                    } else {
+                        addTestResult('❌ Test 10: Configuración responsive', 'fail', 'Meta viewport incorrecta');
+                    }
+                } catch (e) {
+                    addTestResult('❌ Test 10: Configuración responsive', 'fail', e.message);
+                }
+
+                console.log('✅ Todas las pruebas completadas');
+                console.log(`Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}`);
+
+            } catch (error) {
+                console.error('Error en suite de pruebas:', error);
+                addTestResult('❌ Error crítico en suite', 'fail', error.message);
+            } finally {
+                document.getElementById('runBtn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

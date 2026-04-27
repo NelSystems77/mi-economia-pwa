@@ -1237,3 +1237,6 @@ const SupermarketV2 = {
         setTimeout(() => toast.remove(), 3000);
     }
 };
+
+// Exponer globalmente para que funcione con onclick en HTML
+window.SupermarketV2 = SupermarketV2;
