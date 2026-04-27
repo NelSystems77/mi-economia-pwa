@@ -4,7 +4,7 @@
 // =============================================
 
 const SupermarketV2 = {
-    version: '3.5.5',
+    version: '3.5.6',
     currentListId: null,
     currentView: 'dashboard',
     monthlyBudget: 0,
@@ -765,26 +765,26 @@ const SupermarketV2 = {
         // Agregar event listeners después de renderizar
         const checkboxes = document.querySelectorAll('.product-checkbox');
         console.log('📌 Agregando event listeners a', checkboxes.length, 'checkboxes');
-        const self = this; // Guardar referencia a SupermarketV2
         checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', async function(e) {
+            checkbox.addEventListener('change', async (e) => {
                 console.log('🔘 Checkbox clickeado!', e.target.dataset.productId);
                 const productId = parseInt(e.target.dataset.productId);
                 console.log('⏳ Llamando a toggleProductCheck con ID:', productId);
                 try {
-                    await self.toggleProductCheck(productId);
+                    await this.toggleProductCheck(productId);
                     console.log('✅ toggleProductCheck completado');
                 } catch (error) {
                     console.error('❌ Error en toggleProductCheck:', error);
+                    console.error('Stack:', error.stack);
                 }
             });
         });
         console.log('✅ Event listeners agregados a checkboxes');
         
         document.querySelectorAll('.price-input').forEach(input => {
-            input.addEventListener('change', async function(e) {
+            input.addEventListener('change', async (e) => {
                 const productId = parseInt(e.target.dataset.productId);
-                await self.updateProductPrice(productId, e.target.value);
+                await this.updateProductPrice(productId, e.target.value);
             });
         });
         
@@ -801,9 +801,9 @@ const SupermarketV2 = {
         
         // Event listeners para botones de undo
         document.querySelectorAll('.undo-btn').forEach(btn => {
-            btn.addEventListener('click', async function(e) {
+            btn.addEventListener('click', async (e) => {
                 const productId = parseInt(e.target.dataset.productId);
-                await self.uncheckProduct(productId);
+                await this.uncheckProduct(productId);
             });
         });
         
