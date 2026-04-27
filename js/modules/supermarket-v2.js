@@ -248,14 +248,17 @@ const SupermarketV2 = {
                 <p class="list-items">📦 ${list.itemCount || 0} productos</p>
                 <p class="list-total">💰 ${App.formatCurrency(list.totalEstimated || 0)}</p>
                 <div class="list-actions">
-                    <button class="btn btn-sm btn-primary" onclick="SupermarketV2.continueList(${list.id})" title="Editar">
+                    <button class="btn btn-sm btn-secondary" onclick="SupermarketV2.continueList(${list.id})" title="Editar">
                         ✏️ Editar
                     </button>
+                    <button class="btn btn-sm btn-primary" onclick="SupermarketV2.enterShoppingMode(${list.id})" title="Modo Compras">
+                        🛒 Comprar
+                    </button>
                     <button class="btn btn-sm btn-secondary" onclick="SupermarketV2.duplicateList(${list.id})" title="Duplicar">
-                        📋 Duplicar
+                        📋
                     </button>
                     <button class="btn btn-sm btn-accent" onclick="SupermarketV2.finishShoppingFromDashboard(${list.id})" title="Finalizar">
-                        ✅ Finalizar
+                        ✅
                     </button>
                     <button class="btn btn-sm btn-danger" onclick="SupermarketV2.deleteList(${list.id})" title="Eliminar">
                         🗑️
@@ -490,7 +493,6 @@ const SupermarketV2 = {
             return;
         }
 
-        // Cargar productos agrupados por categoría
         const products = await DB.getAll('masterProducts');
         const grouped = {};
         
@@ -503,9 +505,7 @@ const SupermarketV2 = {
         container.innerHTML = Object.entries(grouped).map(([category, prods]) => `
             <div class="preload-category">
                 <div class="category-header">
-                    <input type="checkbox" 
-                           id="cat-${category}" 
-                           onchange="SupermarketV2.toggleCategory('${category}', this.checked)">
+                    <input type="checkbox" id="cat-${category}" onchange="SupermarketV2.toggleCategory('${category}', this.checked)">
                     <label for="cat-${category}">
                         ${this.getCategoryLabel(category)}
                         <span>(${prods.length} productos)</span>
@@ -514,14 +514,13 @@ const SupermarketV2 = {
                 <div class="category-products" id="products-${category}">
                     ${prods.map(p => `
                         <label class="preload-product-item" for="prod-${p.id}">
-                            <input type="checkbox" 
-                                   class="product-check cat-${category}" 
-                                   data-product-id="${p.id}"
-                                   id="prod-${p.id}"
-                                   onchange="SupermarketV2.updatePreloadCounter()">
+                            <input type="checkbox" class="product-check cat-${category}" data-product-id="${p.id}" id="prod-${p.id}" onchange="SupermarketV2.updatePreloadCounter()">
                             <div style="flex: 1; min-width: 0;">
                                 <strong>${p.name}</strong>
-                                <small>${p.defaultQuantity} ${p.unit}</small>
+                                <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;">
+                                    <input type="number" class="qty-input" id="qty-${p.id}" value="${p.defaultQuantity}" min="0.1" step="0.1" style="width: 60px; padding: 0.25rem;">
+                                    <small>${p.unit}</small>
+                                </div>
                             </div>
                         </label>
                     `).join('')}
@@ -529,16 +528,10 @@ const SupermarketV2 = {
             </div>
         `).join('');
 
-        // Forzar visibilidad máxima con múltiples métodos
         modal.style.cssText = 'display: flex !important; z-index: 2147483647 !important;';
         modal.setAttribute('style', 'display: flex !important; z-index: 2147483647 !important;');
         modal.classList.add('modal-visible');
-        
-        // Scroll al inicio
-        setTimeout(() => {
-            modal.scrollTop = 0;
-        }, 10);
-        
+        setTimeout(() => modal.scrollTop = 0, 10);
         this.updatePreloadCounter();
     },
 
@@ -596,24 +589,23 @@ const SupermarketV2 = {
         }
 
         const selectedCheckboxes = document.querySelectorAll('.product-check:checked');
-        const selectedIds = Array.from(selectedCheckboxes).map(cb => 
-            parseInt(cb.dataset.productId)
-        );
+        const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.productId));
 
         if (selectedIds.length === 0) {
             this.showError('Selecciona al menos un producto');
             return;
         }
 
-        // Agregar productos seleccionados a la lista
         for (const productId of selectedIds) {
             const product = await DB.get('masterProducts', productId);
+            const qtyInput = document.getElementById(`qty-${productId}`);
+            const customQty = qtyInput ? parseFloat(qtyInput.value) : product.defaultQuantity;
             
             await DB.add('shoppingProducts', {
                 listId: this.currentListId,
                 productId: product.id,
                 name: product.name,
-                quantity: product.defaultQuantity,
+                quantity: customQty,
                 unit: product.unit,
                 estimatedPrice: product.lastPrice || 0,
                 actualPrice: 0,
@@ -621,11 +613,9 @@ const SupermarketV2 = {
             });
         }
 
-        // Cerrar modal y actualizar lista
         this.closePreloadModal();
         await this.updateListTotal();
         await this.renderListProducts();
-        
         this.showSuccess(`${selectedIds.length} productos agregados`);
     },
 
@@ -703,7 +693,6 @@ const SupermarketV2 = {
         const products = await DB.getAll('shoppingProducts');
         const originalProducts = products.filter(p => p.listId === listId);
 
-        // Crear nueva lista
         const newListId = await DB.add('shoppingLists', {
             name: `${originalList.name} (Copia)`,
             storeId: originalList.storeId,
@@ -715,7 +704,6 @@ const SupermarketV2 = {
             itemCount: 0
         });
 
-        // Copiar productos
         for (const product of originalProducts) {
             await DB.add('shoppingProducts', {
                 listId: newListId,
@@ -731,6 +719,156 @@ const SupermarketV2 = {
 
         this.showSuccess('Lista duplicada');
         await this.editList(newListId);
+    },
+
+    async enterShoppingMode(listId) {
+        this.currentListId = listId;
+        const list = await DB.get('shoppingLists', listId);
+        
+        this.showView('shopping');
+        document.getElementById('shoppingListName').textContent = list.name;
+        document.getElementById('shoppingStoreName').textContent = list.storeName;
+        
+        await this.renderShoppingMode();
+    },
+
+    async renderShoppingMode() {
+        const products = await DB.getAll('shoppingProducts');
+        const listProducts = products.filter(p => p.listId === this.currentListId);
+        
+        const pending = listProducts.filter(p => !p.checked);
+        const checked = listProducts.filter(p => p.checked);
+        
+        const pendingContainer = document.getElementById('pendingProducts');
+        const checkedContainer = document.getElementById('checkedProducts');
+        
+        pendingContainer.innerHTML = pending.map(p => `
+            <div class="shopping-product-item" data-product-id="${p.id}">
+                <input type="checkbox" id="check-${p.id}" onchange="SupermarketV2.toggleProductCheck(${p.id})">
+                <label for="check-${p.id}">
+                    <strong>${p.name}</strong>
+                    <small>${p.quantity} ${p.unit}</small>
+                </label>
+                <input type="number" class="price-input" placeholder="Precio" value="${p.actualPrice || ''}" onchange="SupermarketV2.updateProductPrice(${p.id}, this.value)" style="width: 80px;">
+            </div>
+        `).join('') || '<p class="empty-state-text">No hay productos pendientes</p>';
+        
+        checkedContainer.innerHTML = checked.map(p => `
+            <div class="shopping-product-item checked-item">
+                <input type="checkbox" id="check-${p.id}" checked disabled>
+                <label style="text-decoration: line-through; opacity: 0.6;">
+                    <strong>${p.name}</strong>
+                    <small>${p.quantity} ${p.unit}</small>
+                </label>
+                <button class="btn-icon" onclick="SupermarketV2.uncheckProduct(${p.id})" title="Desmarcar">↩️</button>
+            </div>
+        `).join('') || '<p class="empty-state-text">Ningún producto comprado aún</p>';
+        
+        document.getElementById('pendingCount').textContent = pending.length;
+        document.getElementById('checkedCount').textContent = checked.length;
+    },
+
+    async toggleProductCheck(productId) {
+        const product = await DB.get('shoppingProducts', productId);
+        product.checked = !product.checked;
+        product.checkedAt = new Date().toISOString();
+        await DB.update('shoppingProducts', product);
+        await this.renderShoppingMode();
+    },
+
+    async uncheckProduct(productId) {
+        const choice = confirm('¿Qué deseas hacer?\n\nOK = Comprar nuevamente (+1)\nCancelar = Fue un error');
+        const product = await DB.get('shoppingProducts', productId);
+        
+        if (choice) {
+            product.quantity += 1;
+        }
+        
+        product.checked = false;
+        await DB.update('shoppingProducts', product);
+        await this.renderShoppingMode();
+    },
+
+    async updateProductPrice(productId, price) {
+        const product = await DB.get('shoppingProducts', productId);
+        product.actualPrice = parseFloat(price) || 0;
+        await DB.update('shoppingProducts', product);
+    },
+
+    async searchInShopping() {
+        const query = document.getElementById('shoppingSearch').value.trim().toLowerCase();
+        if (!query) return;
+        
+        const allProducts = await DB.getAll('masterProducts');
+        const listProducts = await DB.getAll('shoppingProducts');
+        const currentList = listProducts.filter(p => p.listId === this.currentListId);
+        
+        const results = allProducts.filter(p => p.name.toLowerCase().includes(query));
+        const container = document.getElementById('searchResults');
+        
+        container.innerHTML = results.map(p => {
+            const inList = currentList.find(lp => lp.productId === p.id);
+            return `
+                <div class="search-result-item">
+                    <span><strong>${p.name}</strong> <small>${p.defaultQuantity} ${p.unit}</small></span>
+                    ${inList ? 
+                        `<button class="btn btn-sm btn-primary" onclick="SupermarketV2.markAsChecked(${inList.id})">✓ Marcar Comprado</button>` :
+                        `<button class="btn btn-sm btn-secondary" onclick="SupermarketV2.addFromSearch(${p.id})">+ Agregar</button>`
+                    }
+                </div>
+            `;
+        }).join('') || '<p>No se encontraron resultados</p>';
+    },
+
+    async addFromSearch(productId) {
+        const product = await DB.get('masterProducts', productId);
+        await DB.add('shoppingProducts', {
+            listId: this.currentListId,
+            productId: product.id,
+            name: product.name,
+            quantity: product.defaultQuantity,
+            unit: product.unit,
+            estimatedPrice: product.lastPrice || 0,
+            actualPrice: 0,
+            checked: false
+        });
+        document.getElementById('searchResults').innerHTML = '';
+        document.getElementById('shoppingSearch').value = '';
+        await this.renderShoppingMode();
+        this.showSuccess(`${product.name} agregado`);
+    },
+
+    async markAsChecked(productId) {
+        await this.toggleProductCheck(productId);
+        document.getElementById('searchResults').innerHTML = '';
+        document.getElementById('shoppingSearch').value = '';
+    },
+
+    async finishShoppingWithTotal() {
+        const manualTotal = parseFloat(document.getElementById('manualTotal').value);
+        
+        if (manualTotal && manualTotal > 0) {
+            const list = await DB.get('shoppingLists', this.currentListId);
+            list.completed = true;
+            list.completedDate = new Date().toISOString().split('T')[0];
+            list.totalActual = manualTotal;
+            list.totalManual = manualTotal;
+            await DB.update('shoppingLists', list);
+            
+            await DB.add('expenses', {
+                description: `Compra: ${list.name}`,
+                amount: manualTotal,
+                category: 'groceries',
+                date: list.completedDate,
+                metadata: { listId: list.id, storeName: list.storeName }
+            });
+            
+            this.showSuccess('Compra finalizada con total general');
+            this.showView('dashboard');
+            await this.loadDashboard();
+        } else {
+            await this.finishShopping();
+        }
     },
 
     async searchProductsToAdd(query) {

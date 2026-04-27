@@ -1,0 +1,241 @@
+<!-- ========================================
+     MÓDULO SUPERMERCADO V2 - HTML COMPLETO
+     ======================================== -->
+
+<!-- Supermercado Module V2 -->
+<section id="module-supermarket-v2" class="module">
+    <div class="module-header">
+        <h2>🛒 Supermercado</h2>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <div class="super-nav card">
+        <button class="btn btn-sm btn-primary" id="btnSuperDashboard">📊 Dashboard</button>
+        <button class="btn btn-sm btn-secondary" id="btnNewShoppingList">📝 Nueva Lista</button>
+        <button class="btn btn-sm btn-secondary" id="btnMasterCatalog">📦 Catálogo</button>
+        <button class="btn btn-sm btn-secondary" id="btnStores">🏪 Tiendas</button>
+        <button class="btn btn-sm btn-secondary" id="btnShoppingHistory">📋 Historial</button>
+    </div>
+
+    <!-- Dashboard del Supermercado -->
+    <div id="super-dashboard" class="super-section">
+        <div class="dashboard-grid">
+            <div class="card balance-card income">
+                <div class="card-icon">💰</div>
+                <div class="card-content">
+                    <span class="card-label">Presupuesto Mensual</span>
+                    <span class="card-value" id="superBudget">₡0.00</span>
+                </div>
+            </div>
+
+            <div class="card balance-card expenses">
+                <div class="card-icon">🛒</div>
+                <div class="card-content">
+                    <span class="card-label">Gastado Este Mes</span>
+                    <span class="card-value" id="superSpent">₡0.00</span>
+                </div>
+            </div>
+
+            <div class="card balance-card balance">
+                <div class="card-icon">💵</div>
+                <div class="card-content">
+                    <span class="card-label">Disponible</span>
+                    <span class="card-value" id="superRemaining">₡0.00</span>
+                </div>
+            </div>
+
+            <div class="card balance-card savings">
+                <div class="card-icon">📊</div>
+                <div class="card-content">
+                    <span class="card-label">% Ahorro</span>
+                    <span class="card-value" id="superSavings">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📊 Gastos por Tienda</h3>
+            <canvas id="storeExpensesChart"></canvas>
+        </div>
+
+        <div class="card">
+            <h3>📝 Listas Activas</h3>
+            <div id="activeListsContainer"></div>
+        </div>
+
+        <div class="card">
+            <h3>🔄 Productos Frecuentes</h3>
+            <div id="frequentProductsContainer"></div>
+        </div>
+    </div>
+
+    <!-- Catálogo Maestro -->
+    <div id="super-catalog" class="super-section" style="display:none;">
+        <div class="card">
+            <h3>Buscar Productos</h3>
+            <input type="text" id="searchMasterProducts" class="form-control" placeholder="Buscar...">
+        </div>
+
+        <div class="card form-card">
+            <h3>Agregar Nuevo Producto</h3>
+            <form id="formAddMasterProduct">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="masterProductName" class="form-control" required>
+                </div>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Cantidad</label>
+                        <input type="number" id="masterProductQuantity" class="form-control" value="1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Unidad</label>
+                        <select id="masterProductUnit" class="form-control">
+                            <option value="unidad">Unidad</option>
+                            <option value="kg">Kilogramo</option>
+                            <option value="lt">Litro</option>
+                            <option value="paquete">Paquete</option>
+                            <option value="caja">Caja</option>
+                            <option value="gr">Gramos</option>
+                            <option value="ml">Mililitros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="masterProductCategory" class="form-control">
+                            <option value="grains">Granos</option>
+                            <option value="dairy">Lácteos</option>
+                            <option value="meat">Carnes</option>
+                            <option value="fruits">Frutas</option>
+                            <option value="vegetables">Vegetales</option>
+                            <option value="bakery">Panadería</option>
+                            <option value="beverages">Bebidas</option>
+                            <option value="snacks">Snacks</option>
+                            <option value="pasta">Pastas</option>
+                            <option value="canned">Enlatados</option>
+                            <option value="cereals">Cereales</option>
+                            <option value="oils">Aceites</option>
+                            <option value="cleaning">Limpieza</option>
+                            <option value="personal">Cuidado Personal</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Agregar Producto</button>
+            </form>
+        </div>
+
+        <div id="masterProductsList"></div>
+    </div>
+
+    <!-- Nueva Lista -->
+    <div id="super-newlist" class="super-section" style="display:none;">
+        <div class="card form-card">
+            <h3>Crear Nueva Lista de Compras</h3>
+            <form id="formNewShoppingList" onsubmit="event.preventDefault();">
+                <div class="form-group">
+                    <label>Nombre de la Lista</label>
+                    <input type="text" id="newListName" class="form-control" placeholder="Ej: Compra Semanal" required>
+                </div>
+                <div class="form-group">
+                    <label>Supermercado</label>
+                    <select id="newListStore" class="form-control" required>
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-actions" style="display: flex; gap: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="SupermarketV2.createEmptyList()">
+                        📝 Crear Vacía
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="SupermarketV2.createListWithProducts()">
+                        📦 Pre-cargar Productos
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="addProductsSection" style="display:none;">
+            <div class="card">
+                <div class="list-info-header">
+                    <div>
+                        <h3 id="listNameDisplay"></h3>
+                        <p>🏪 <span id="listStoreDisplay"></span></p>
+                    </div>
+                    <div class="list-actions-header">
+                        <button class="btn btn-sm btn-secondary" onclick="SupermarketV2.showPreloadModal()">
+                            📦 Agregar Productos
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Buscar Producto Individual</h3>
+                <input type="text" id="searchProductToAdd" class="form-control" placeholder="Buscar producto para agregar...">
+                <div id="productSearchResults" class="search-results"></div>
+            </div>
+
+            <div class="card">
+                <h3>Productos en la Lista</h3>
+                <div id="currentListProducts" class="list-products-container"></div>
+                <div class="list-total-container">
+                    <strong>Total Estimado:</strong>
+                    <span id="listTotalEstimated">₡0.00</span>
+                </div>
+                <div class="form-actions" style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-secondary" onclick="SupermarketV2.saveList()">
+                        💾 Guardar Lista
+                    </button>
+                    <button class="btn btn-accent" onclick="SupermarketV2.finishShopping()">
+                        ✅ Finalizar Compra
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Pre-cargar Productos -->
+    <div id="preloadProductsModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>📦 Seleccionar Productos</h3>
+                <button class="btn-icon" onclick="SupermarketV2.closePreloadModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="preload-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="SupermarketV2.selectAllProducts()">
+                        ☑️ Seleccionar Todo
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="SupermarketV2.selectFrequentProducts()">
+                        ⭐ Solo Frecuentes
+                    </button>
+                    <span id="preloadCounter" class="preload-counter">0 seleccionados</span>
+                </div>
+                <div id="preloadProductsList" class="preload-products-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="SupermarketV2.closePreloadModal()">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" onclick="SupermarketV2.confirmPreload()">
+                    ✅ Agregar Seleccionados
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tiendas -->
+    <div id="super-stores" class="super-section" style="display:none;">
+        <div class="card">
+            <h3>Mis Supermercados</h3>
+            <div id="storesList"></div>
+        </div>
+    </div>
+
+    <!-- Historial -->
+    <div id="super-history" class="super-section" style="display:none;">
+        <div class="card">
+            <h3>Historial de Compras</h3>
+            <div id="historyList"></div>
+        </div>
+    </div>
+</section>
