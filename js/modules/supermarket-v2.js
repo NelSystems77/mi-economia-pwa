@@ -738,6 +738,7 @@ const SupermarketV2 = {
         
         const pending = listProducts.filter(p => !p.checked);
         const checked = listProducts.filter(p => p.checked);
+        const total = listProducts.length;
         
         const pendingContainer = document.getElementById('pendingProducts');
         const checkedContainer = document.getElementById('checkedProducts');
@@ -751,7 +752,7 @@ const SupermarketV2 = {
                 </label>
                 <input type="number" class="price-input" placeholder="Precio" value="${p.actualPrice || ''}" onchange="SupermarketV2.updateProductPrice(${p.id}, this.value)" style="width: 80px;">
             </div>
-        `).join('') || '<p class="empty-state-text">No hay productos pendientes</p>';
+        `).join('') || '<p class="empty-state-text">✅ ¡Todos los productos comprados!</p>';
         
         checkedContainer.innerHTML = checked.map(p => `
             <div class="shopping-product-item checked-item">
@@ -764,7 +765,7 @@ const SupermarketV2 = {
             </div>
         `).join('') || '<p class="empty-state-text">Ningún producto comprado aún</p>';
         
-        document.getElementById('pendingCount').textContent = pending.length;
+        document.getElementById('pendingCount').textContent = `${checked.length} de ${total}`;
         document.getElementById('checkedCount').textContent = checked.length;
     },
 
