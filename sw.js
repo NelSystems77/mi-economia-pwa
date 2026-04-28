@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mi-economia-v3.5.6';
+const CACHE_NAME = 'mi-economia-v3.5.7-FORCE';
 const urlsToCache = [
   './',
   './index.html',

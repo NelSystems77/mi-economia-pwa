@@ -4,7 +4,7 @@
 // =============================================
 
 const SupermarketV2 = {
-    version: '3.5.6',
+    version: '3.5.7',
     currentListId: null,
     currentView: 'dashboard',
     monthlyBudget: 0,
