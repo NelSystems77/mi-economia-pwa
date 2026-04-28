@@ -10,10 +10,9 @@ const App = {
         this.checkNotifications();
         this.loadUserInfo();
         
-        // Service Worker DESHABILITADO temporalmente por problemas de cache
-        // if ('serviceWorker' in navigator) {
-        //     navigator.serviceWorker.register('sw.js');
-        // }
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
     },
 
     setupEventListeners() {
