@@ -1024,13 +1024,6 @@ const SupermarketV2 = {
         `).join('');
     },
 
-    async toggleProductCheck(productId) {
-        const product = await DB.get('shoppingProducts', productId);
-        product.checked = !product.checked;
-        await DB.update('shoppingProducts', product);
-        await this.renderListProducts();
-    },
-
     async updateProductQuantity(productId, quantity) {
         const product = await DB.get('shoppingProducts', productId);
         product.quantity = parseFloat(quantity);
